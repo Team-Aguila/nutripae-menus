@@ -1,4 +1,4 @@
-# Cobertura Pae Backend.
+# Menus Pae Backend.
 
 This repo uses commitizen and pre-commit packages in order to manage the commit messages and the changelog.
 
@@ -9,7 +9,7 @@ git add .
 git commit -m "this is a commit"
 ```
 
-This is goint to be automatically rejected and you have to use:
+This is goin to be automatically rejected and you have to use:
 
 ```bash
 git add .
