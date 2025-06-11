@@ -8,7 +8,8 @@ from pae_menus.models.ingredient import (
     Ingredient, 
     IngredientCreate, 
     IngredientUpdate, 
-    IngredientResponse
+    IngredientResponse,
+    IngredientStatus
 )
 
 
@@ -58,6 +59,55 @@ class IngredientService:
                 detail=f"Error creating ingredient: {str(e)}"
             )
 
+    @staticmethod
+    async def get_active_ingredients(
+        skip: int = 0, 
+        limit: int = 100, 
+        category_filter: Optional[str] = None,
+        search: Optional[str] = None
+    ) -> List[IngredientResponse]:
+        """
+        Get only active ingredients available for menu creation.
+        This method specifically filters out inactive ingredients to ensure
+        they don't appear when creating new menus.
+        
+        Args:
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            category_filter: Filter by ingredient category
+            search: Search term for ingredient name
+            
+        Returns:
+            List[IngredientResponse]: List of active ingredients only
+        """
+        try:
+            # Build query - always filter for active status
+            query = {"status": IngredientStatus.ACTIVE.value}
+            
+            if category_filter:
+                query["category"] = category_filter
+                
+            if search:
+                query["name"] = {"$regex": search, "$options": "i"}
+            
+            # Execute query
+            ingredients = await Ingredient.find(query).skip(skip).limit(limit).to_list()
+            
+            return [
+                IngredientResponse(
+                    id=str(ingredient.id),
+                    **ingredient.model_dump(exclude={"id"})
+                )
+                for ingredient in ingredients
+            ]
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error retrieving active ingredients: {str(e)}"
+            )
+        
+        
     @staticmethod
     async def get_ingredient_by_id(ingredient_id: str) -> IngredientResponse:
         """
@@ -271,4 +321,114 @@ class IngredientService:
             return existing is None
             
         except Exception:
-            return False 
+            return False
+
+    @staticmethod
+    async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+        """
+        Inactivate an ingredient (soft delete) by setting its status to INACTIVE.
+        This performs a logical deletion - the ingredient will not be available for new menus
+        but existing menu associations remain intact.
+        
+        Args:
+            ingredient_id: The ingredient ID to inactivate
+            
+        Returns:
+            IngredientResponse: The inactivated ingredient
+            
+        Raises:
+            HTTPException: If ingredient not found or already inactive
+        """
+        try:
+            # Get existing ingredient
+            ingredient = await Ingredient.get(PydanticObjectId(ingredient_id))
+            if not ingredient:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Ingredient with id '{ingredient_id}' not found"
+                )
+            
+            # Check if already inactive
+            if ingredient.status == IngredientStatus.INACTIVE:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Ingredient '{ingredient.name}' is already inactive"
+                )
+            
+            # Inactivate ingredient
+            ingredient.status = IngredientStatus.INACTIVE
+            ingredient.update_timestamp()
+            await ingredient.save()
+            
+            return IngredientResponse(
+                id=str(ingredient.id),
+                **ingredient.model_dump(exclude={"id"})
+            )
+            
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid ingredient ID format"
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error inactivating ingredient: {str(e)}"
+            )
+
+    @staticmethod
+    async def reactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+        """
+        Reactivate an ingredient by setting its status to ACTIVE.
+        
+        Args:
+            ingredient_id: The ingredient ID to reactivate
+            
+        Returns:
+            IngredientResponse: The reactivated ingredient
+            
+        Raises:
+            HTTPException: If ingredient not found or already active
+        """
+        try:
+            # Get existing ingredient
+            ingredient = await Ingredient.get(PydanticObjectId(ingredient_id))
+            if not ingredient:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Ingredient with id '{ingredient_id}' not found"
+                )
+            
+            # Check if already active
+            if ingredient.status == IngredientStatus.ACTIVE:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Ingredient '{ingredient.name}' is already active"
+                )
+            
+            # Reactivate ingredient
+            ingredient.status = IngredientStatus.ACTIVE
+            ingredient.update_timestamp()
+            await ingredient.save()
+            
+            return IngredientResponse(
+                id=str(ingredient.id),
+                **ingredient.model_dump(exclude={"id"})
+            )
+            
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid ingredient ID format"
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error reactivating ingredient: {str(e)}"
+            )
+
+ 

@@ -39,7 +39,7 @@ async def create_ingredient(ingredient_data: IngredientCreate) -> IngredientResp
     "/",
     response_model=List[IngredientResponse],
     summary="Get all ingredients",
-    description="Retrieve all ingredients with optional filtering and pagination."
+    description="Retrieve all ingredients with optional filtering and pagination. Use '/active' endpoint for menu creation to exclude inactive ingredients."
 )
 async def get_ingredients(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
@@ -51,9 +51,12 @@ async def get_ingredients(
     """
     Get all ingredients with optional filtering.
     
+    This endpoint returns both active and inactive ingredients based on filtering.
+    For menu creation, use the '/active' endpoint instead to exclude inactive ingredients.
+    
     - **skip**: Number of records to skip for pagination
     - **limit**: Maximum number of records to return
-    - **status**: Filter by ingredient status (active/inactive)
+    - **status**: Filter by ingredient status (active/inactive). Leave empty to get all.
     - **category**: Filter by ingredient category
     - **search**: Search term for ingredient name (case-insensitive)
     """
@@ -65,6 +68,64 @@ async def get_ingredients(
         search=search
     )
     return ingredients
+
+
+@router.get(
+    "/active",
+    response_model=List[IngredientResponse],
+    summary="Get active ingredients for menu creation",
+    description="Retrieve only active ingredients available for creating new menus. Inactive ingredients are excluded."
+)
+async def get_active_ingredients(
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    category: Optional[str] = Query(None, description="Filter by ingredient category"),
+    search: Optional[str] = Query(None, description="Search term for ingredient name")
+) -> List[IngredientResponse]:
+    """
+    Get only active ingredients for menu creation.
+    
+    This endpoint specifically filters out inactive ingredients to ensure
+    they don't appear when creating new menus, implementing the soft deletion logic.
+    
+    - **skip**: Number of records to skip for pagination
+    - **limit**: Maximum number of records to return
+    - **category**: Filter by ingredient category
+    - **search**: Search term for ingredient name (case-insensitive)
+    """
+    ingredients = await IngredientService.get_active_ingredients(
+        skip=skip,
+        limit=limit,
+        category_filter=category,
+        search=search
+    )
+    return ingredients
+
+
+@router.get(
+    "/validate/name-uniqueness",
+    summary="Check name uniqueness",
+    description="Real-time validation endpoint to check if an ingredient name is unique."
+)
+async def check_name_uniqueness(
+    name: str = Query(..., description="The ingredient name to check"),
+    exclude_id: Optional[str] = Query(None, description="ID to exclude from uniqueness check (for updates)")
+) -> JSONResponse:
+    """
+    Check if an ingredient name is unique.
+    
+    - **name**: The ingredient name to validate
+    - **exclude_id**: Optional ID to exclude from check (useful for updates)
+    """
+    is_unique = await IngredientService.check_name_uniqueness(name, exclude_id)
+    
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={
+            "is_unique": is_unique,
+            "message": "Name is available" if is_unique else f"Name '{name}' is already taken"
+        }
+    )
 
 
 @router.get(
@@ -125,27 +186,44 @@ async def delete_ingredient(ingredient_id: str) -> JSONResponse:
     )
 
 
-@router.get(
-    "/validate/name-uniqueness",
-    summary="Check name uniqueness",
-    description="Real-time validation endpoint to check if an ingredient name is unique."
+@router.patch(
+    "/{ingredient_id}/inactivate",
+    response_model=IngredientResponse,
+    summary="Inactivate an ingredient",
+    description="Mark an ingredient as inactive (soft delete). The ingredient will no longer be available for new menus but existing menu associations remain intact."
 )
-async def check_name_uniqueness(
-    name: str = Query(..., description="The ingredient name to check"),
-    exclude_id: Optional[str] = Query(None, description="ID to exclude from uniqueness check (for updates)")
-) -> JSONResponse:
+async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
     """
-    Check if an ingredient name is unique.
+    Inactivate an ingredient (soft delete).
     
-    - **name**: The ingredient name to validate
-    - **exclude_id**: Optional ID to exclude from check (useful for updates)
+    This action:
+    - Marks the ingredient status as INACTIVE
+    - Prevents the ingredient from being available for new menus
+    - Preserves existing menu associations (they are not removed)
+    - Performs logical deletion (record remains in database)
+    
+    - **ingredient_id**: The unique identifier of the ingredient to inactivate
     """
-    is_unique = await IngredientService.check_name_uniqueness(name, exclude_id)
+    ingredient = await IngredientService.inactivate_ingredient(ingredient_id)
+    return ingredient
+
+
+@router.patch(
+    "/{ingredient_id}/reactivate",
+    response_model=IngredientResponse,
+    summary="Reactivate an ingredient",
+    description="Mark an inactive ingredient as active again, making it available for new menus."
+)
+async def reactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+    """
+    Reactivate an ingredient.
     
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={
-            "is_unique": is_unique,
-            "message": "Name is available" if is_unique else f"Name '{name}' is already taken"
-        }
-    ) 
+    This action:
+    - Marks the ingredient status as ACTIVE
+    - Makes the ingredient available for new menus again
+    - Updates the timestamp
+    
+    - **ingredient_id**: The unique identifier of the ingredient to reactivate
+    """
+    ingredient = await IngredientService.reactivate_ingredient(ingredient_id)
+    return ingredient 
