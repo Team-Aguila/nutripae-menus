@@ -1,4 +1,4 @@
-# pae_cobertura/models/__init__.py
+# pae_menus/models/__init__.py
 from sqlmodel import SQLModel
 
 from .department import Department

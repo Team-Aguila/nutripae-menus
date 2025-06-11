@@ -1,5 +1,5 @@
 [project]
-name = "pae-cobertura"
+name = "pae-menus"
 version = "0.1.0"
 description = ""
 authors = [
@@ -15,7 +15,7 @@ dependencies = [
 ]
 
 [tool.poetry]
-packages = [{include = "pae_cobertura", from = "src"}]
+packages = [{include = "pae_menus", from = "src"}]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -36,4 +36,4 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-dev = "uvicorn pae_cobertura.main:app --reload --app-dir src"
+dev = "uvicorn pae_menus.main:app --reload --app-dir src"

@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  pae-coberturad-db:
+  pae-menus-db:
     image: mongo:latest
-    container_name: pae-coberturad-db
+    container_name: pae-menu-db
     restart: always
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
