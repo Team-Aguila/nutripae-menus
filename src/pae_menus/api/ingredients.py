@@ -313,7 +313,7 @@ async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
 
 
 @router.patch(
-    "/{ingredient_id}/reactivate",
+    "/{ingredient_id}/activate",
     response_model=IngredientResponse,
     summary="Reactivate an ingredient",
     description="Mark an inactive ingredient as active again, making it available for new menus."
