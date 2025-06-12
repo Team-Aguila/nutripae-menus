@@ -1,6 +1,6 @@
 from beanie import Document, Indexed
 from pydantic import BaseModel, Field, field_validator
-from typing import Optional
+from typing import Optional, List
 from enum import Enum
 from datetime import datetime
 
@@ -8,6 +8,14 @@ from datetime import datetime
 class IngredientStatus(str, Enum):
     ACTIVE = "active"
     INACTIVE = "inactive"
+
+
+class MenuUsageInfo(BaseModel):
+    """Menu usage information for an ingredient"""
+    dish_count: int = Field(0, description="Number of dishes using this ingredient")
+    menu_cycle_count: int = Field(0, description="Number of menu cycles using this ingredient")
+    dish_names: List[str] = Field(default=[], description="Names of dishes using this ingredient")
+    last_used_date: Optional[datetime] = Field(None, description="Last date this ingredient was used in a menu")
 
 
 class IngredientBase(BaseModel):
@@ -86,6 +94,17 @@ class IngredientResponse(IngredientBase):
     id: str = Field(alias="_id")
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        populate_by_name = True
+
+
+class IngredientDetailedResponse(IngredientBase):
+    """Schema for detailed ingredient response with menu usage information"""
+    id: str = Field(alias="_id")
+    created_at: datetime
+    updated_at: datetime
+    menu_usage: MenuUsageInfo = Field(default_factory=MenuUsageInfo, description="Menu usage details")
 
     class Config:
         populate_by_name = True 

@@ -7,6 +7,7 @@ from pae_menus.models.ingredient import (
     IngredientCreate, 
     IngredientUpdate, 
     IngredientResponse,
+    IngredientDetailedResponse,
     IngredientStatus
 )
 from pae_menus.services.ingredient_service import IngredientService
@@ -103,6 +104,87 @@ async def get_active_ingredients(
 
 
 @router.get(
+    "/detailed",
+    response_model=List[IngredientDetailedResponse],
+    summary="Get detailed ingredients with menu usage",
+    description="Retrieve ingredients with comprehensive details including menu usage information. Perfect for nutritionist/administrator dashboard views."
+)
+async def get_detailed_ingredients(
+    skip: int = Query(0, ge=0, description="Number of records to skip"),
+    limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
+    status: Optional[IngredientStatus] = Query(None, description="Filter by ingredient status"),
+    category: Optional[str] = Query(None, description="Filter by ingredient category"),
+    search: Optional[str] = Query(None, description="Search term for ingredient name")
+) -> List[IngredientDetailedResponse]:
+    """
+    Get detailed ingredients with menu usage information.
+    
+    This endpoint provides comprehensive ingredient details including:
+    - Basic ingredient information (name, status, category, etc.)
+    - Menu usage statistics (dish count, menu cycle count)
+    - List of dishes using each ingredient
+    - Last usage date in menu cycles
+    
+    Perfect for nutritionist/administrator views where understanding ingredient usage is critical.
+    
+    - **skip**: Number of records to skip for pagination
+    - **limit**: Maximum number of records to return
+    - **status**: Filter by ingredient status (active/inactive)
+    - **category**: Filter by ingredient category
+    - **search**: Search term for ingredient name (case-insensitive)
+    """
+    ingredients = await IngredientService.get_detailed_ingredients(
+        skip=skip,
+        limit=limit,
+        status_filter=status.value if status else None,
+        category_filter=category,
+        search=search
+    )
+    return ingredients
+
+
+@router.get(
+    "/categories",
+    response_model=List[str],
+    summary="Get available ingredient categories",
+    description="Retrieve all available categories for filtering ingredients."
+)
+async def get_ingredient_categories() -> List[str]:
+    """
+    Get all available ingredient categories for filtering purposes.
+    
+    Returns a list of unique categories that are currently used by ingredients.
+    Useful for populating dropdown filters in the UI.
+    """
+    categories = await IngredientService.get_available_categories()
+    return categories
+
+
+@router.get(
+    "/statistics",
+    summary="Get ingredient statistics",
+    description="Get comprehensive statistics about ingredients for dashboard views."
+)
+async def get_ingredient_statistics() -> JSONResponse:
+    """
+    Get comprehensive ingredient statistics.
+    
+    Returns statistics including:
+    - Total ingredient count
+    - Active vs inactive ingredient counts
+    - Number of categories
+    - List of all categories
+    
+    Perfect for dashboard summary views.
+    """
+    stats = await IngredientService.get_ingredient_statistics()
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content=stats
+    )
+
+
+@router.get(
     "/validate/name-uniqueness",
     summary="Check name uniqueness",
     description="Real-time validation endpoint to check if an ingredient name is unique."
@@ -141,6 +223,28 @@ async def get_ingredient(ingredient_id: str) -> IngredientResponse:
     - **ingredient_id**: The unique identifier of the ingredient
     """
     ingredient = await IngredientService.get_ingredient_by_id(ingredient_id)
+    return ingredient
+
+
+@router.get(
+    "/{ingredient_id}/detailed",
+    response_model=IngredientDetailedResponse,
+    summary="Get detailed ingredient by ID with menu usage",
+    description="Retrieve a specific ingredient with comprehensive details including menu usage information."
+)
+async def get_detailed_ingredient(ingredient_id: str) -> IngredientDetailedResponse:
+    """
+    Get a specific ingredient with detailed menu usage information.
+    
+    This endpoint provides comprehensive details for a single ingredient including:
+    - Basic ingredient information
+    - Menu usage statistics
+    - List of dishes using this ingredient
+    - Last usage date in menu cycles
+    
+    - **ingredient_id**: The unique identifier of the ingredient
+    """
+    ingredient = await IngredientService.get_detailed_ingredient_by_id(ingredient_id)
     return ingredient
 
 
