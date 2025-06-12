@@ -1,5 +1,5 @@
 [project]
-name = "pae-cobertura"
+name = "pae-menus"
 version = "0.1.0"
 description = ""
 authors = [
@@ -9,13 +9,15 @@ readme = "README.md"
 requires-python = ">=3.10, <4.0"
 dependencies = [
     "fastapi[all] (>=0.115.12,<0.116.0)",
-    "sqlmodel[all] (>=0.0.24,<0.0.25)",
-    "psycopg2-binary (>=2.9.10,<3.0.0)",
-    "python-dotenv (>=1.1.0,<2.0.0)"
+    "python-dotenv (>=1.1.0,<2.0.0)",
+    "motor (>=3.6.0,<4.0.0)",
+    "beanie (>=1.25.0,<2.0.0)",
+    "pymongo (>=4.10.1,<5.0.0)",
+    "pydantic-settings (>=2.0.0,<3.0.0)"
 ]
 
 [tool.poetry]
-packages = [{include = "pae_cobertura", from = "src"}]
+packages = [{include = "pae_menus", from = "src"}]
 
 
 [tool.poetry.group.dev.dependencies]
@@ -36,4 +38,4 @@ requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
-dev = "uvicorn pae_cobertura.main:app --reload --app-dir src"
+dev = "uvicorn pae_menus.main:app --reload --app-dir src"
