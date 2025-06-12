@@ -1,6 +1,6 @@
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import List
+from typing import List, Optional
 from beanie import PydanticObjectId
 
 class MealType(str, Enum):
@@ -28,4 +28,9 @@ class DailyMenu(BaseModel):
     day: int = Field(..., ge=1, description="Day of the cycle")
     breakfast_dish_ids: List[PydanticObjectId] = Field(default=[])
     lunch_dish_ids: List[PydanticObjectId] = Field(default=[])
-    snack_dish_ids: List[PydanticObjectId] = Field(default=[]) 
+    snack_dish_ids: List[PydanticObjectId] = Field(default=[])
+
+class NutritionalInfo(BaseModel):
+    calories: Optional[float] = Field(default=None, description="Calories per serving")
+    protein: Optional[str] = Field(default=None, description="Protein per serving (e.g., '45g')")
+    photo_url: Optional[str] = Field(default=None, description="URL to a photo of the dish") 

@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from enum import Enum
 from datetime import datetime
-from .commons import Recipe, MealType
+from .commons import Recipe, MealType, NutritionalInfo
 
 class DishStatus(str, Enum):
     """
@@ -40,9 +40,9 @@ class DishBase(BaseModel):
     name: str = Field(..., min_length=1, max_length=255, description="Dish name")
     description: Optional[str] = Field(None, max_length=1000, description="Optional description of the dish")
     status: DishStatus = Field(default=DishStatus.ACTIVE, description="Dish status")
-    dish_type: DishType = Field(..., description="Type of dish")
+    compatible_meal_types: List[MealType] = Field(..., description="Compatible meal types for this dish")
     recipe: Recipe = Field(..., description="Recipe of the dish")
-    nutritional_info: Optional[dict] = Field({}, description="Nutritional information per serving")
+    nutritional_info: Optional[NutritionalInfo] = Field(default=None, description="Nutritional information and photo URL")
 
     @field_validator('name')
     @classmethod
@@ -60,9 +60,9 @@ class DishUpdate(BaseModel):
     name: Optional[str] = Field(None, min_length=1, max_length=255)
     description: Optional[str] = Field(None, max_length=1000)
     status: Optional[DishStatus] = None
-    dish_type: Optional[DishType] = None
+    compatible_meal_types: Optional[List[MealType]] = None
     recipe: Optional[Recipe] = None
-    nutritional_info: Optional[dict] = None
+    nutritional_info: Optional[NutritionalInfo] = None
 
     @field_validator('name')
     @classmethod
@@ -82,7 +82,6 @@ class Dish(Document, DishBase):
         indexes = [
             "name",
             "status",
-            "dish_type",
         ]
     
     def update_timestamp(self):

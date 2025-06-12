@@ -1,18 +1,42 @@
 # pae_menus/main.py
+import logging
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
+from motor.motor_asyncio import AsyncIOMotorClient
+from beanie import init_beanie
 
-from pae_menus.database import init_db, close_db_connection, health_check as db_health_check
-from pae_menus.api.ingredients import router as ingredients_router
+from .core.config import settings
+from .api import api_router
+from .models import Ingredient, Dish, MenuCycle, MenuSchedule
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # Startup
-    await init_db()
+    """
+    Handle startup and shutdown events.
+    """
+    logger.info("Starting up...")
+    app.mongodb_client = AsyncIOMotorClient(settings.mongo_url)
+    app.mongodb = app.mongodb_client[settings.mongo_db_name]
+
+    await init_beanie(
+        database=app.mongodb,
+        document_models=[
+            Ingredient,
+            Dish,
+            MenuCycle,
+            MenuSchedule,
+        ]
+    )
+    logger.info("Database and Beanie initialized.")
+    
     yield
-    # Shutdown
-    await close_db_connection()
+    
+    logger.info("Shutting down...")
+    app.mongodb_client.close()
+    logger.info("MongoDB connection closed.")
 
 
 app = FastAPI(
@@ -22,8 +46,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# Include ingredient management routes
-app.include_router(ingredients_router)
+app.include_router(api_router)
 
 @app.get("/")
 def read_root():
