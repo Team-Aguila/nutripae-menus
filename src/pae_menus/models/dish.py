@@ -92,6 +92,7 @@ class DishResponse(DishBase):
     id: PydanticObjectId = Field(alias="_id")
     created_at: datetime
     updated_at: datetime
+    associated_menus: List[dict] = Field(default=[], description="Placeholder for associated menus")
 
     class Config:
         populate_by_name = True 

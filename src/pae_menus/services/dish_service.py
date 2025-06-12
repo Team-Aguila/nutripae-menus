@@ -1,8 +1,8 @@
 from beanie import PydanticObjectId, Document
 from typing import List, Optional
-from ..models.dish import Dish, DishCreate, DishUpdate
+from ..models.dish import Dish, DishCreate, DishUpdate, DishStatus
 from ..models.ingredient import Ingredient, IngredientStatus
-from ..models.commons import Recipe
+from ..models.commons import Recipe, MealType
 
 class DishService:
     async def create_dish(self, dish_data: DishCreate) -> Dish:
@@ -25,9 +25,25 @@ class DishService:
         """Retrieves a single dish by its ID."""
         return await Dish.get(dish_id)
 
-    async def get_all_dishes(self) -> List[Dish]:
-        """Retrieves all dishes."""
-        return await Dish.find_all().to_list()
+    async def get_all_dishes(
+        self,
+        name: Optional[str] = None,
+        status: Optional[DishStatus] = None,
+        meal_type: Optional[MealType] = None
+    ) -> List[Dish]:
+        """
+        Retrieves all dishes, with optional filtering.
+        """
+        query = []
+        if name:
+            query.append(Dish.name.ilike(f"%{name}%"))
+        if status:
+            query.append(Dish.status == status)
+        if meal_type:
+            # This query finds dishes where the meal_type is present in the compatible_meal_types list
+            query.append(Dish.compatible_meal_types == meal_type)
+            
+        return await Dish.find(*query).to_list()
 
     async def update_dish(self, dish_id: PydanticObjectId, dish_data: DishUpdate) -> Optional[Dish]:
         """

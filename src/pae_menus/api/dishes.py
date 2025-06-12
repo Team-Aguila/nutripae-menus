@@ -1,8 +1,9 @@
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Query
 from beanie import PydanticObjectId
-from typing import List
+from typing import List, Optional
 
-from ..models.dish import Dish, DishCreate, DishUpdate, DishResponse
+from ..models.dish import Dish, DishCreate, DishUpdate, DishResponse, DishStatus
+from ..models.commons import MealType
 from ..services.dish_service import dish_service, DishService
 
 router = APIRouter(
@@ -10,14 +11,17 @@ router = APIRouter(
     responses={404: {"description": "Not found"}},
 )
 
-@router.get("/", response_model=List[DishResponse], summary="Get all dishes")
+@router.get("/", response_model=List[DishResponse], summary="Get all dishes with filtering")
 async def get_all_dishes(
+    name: Optional[str] = Query(None, description="Filter by dish name (case-insensitive substring match)"),
+    status: Optional[DishStatus] = Query(None, description="Filter by dish status"),
+    meal_type: Optional[MealType] = Query(None, description="Filter by compatible meal type"),
     service: DishService = Depends(lambda: dish_service),
 ):
     """
-    Retrieve a list of all dishes.
+    Retrieve a list of all dishes, with optional filters for name, status, and meal type.
     """
-    return await service.get_all_dishes()
+    return await service.get_all_dishes(name=name, status=status, meal_type=meal_type)
 
 @router.get("/{dish_id}", response_model=DishResponse, summary="Get a single dish by ID")
 async def get_dish(
