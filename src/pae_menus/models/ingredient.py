@@ -6,6 +6,13 @@ from datetime import datetime
 
 
 class IngredientStatus(str, Enum):
+    """
+    Ingredient status values.
+    
+    Values:
+    - active: Ingredient is available for use in menus
+    - inactive: Ingredient is not available for new menus (soft deleted)
+    """
     ACTIVE = "active"
     INACTIVE = "inactive"
 

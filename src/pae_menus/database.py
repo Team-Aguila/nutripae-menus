@@ -118,30 +118,35 @@ async def health_check() -> dict:
     Perform a health check on the database connection.
     
     Returns:
-        dict: Health status information
+        dict: Health status message
     """
     try:
         if not motor_client:
-            return {"status": "unhealthy", "error": "No database connection"}
+            logger.warning("Database health check failed: No database connection")
+            return {"status": "unhealthy", "message": "Database connection not established"}
         
         # Try to ping the database
         await motor_client.admin.command('ping')
         
-        # Get database stats
+        # Get database stats for logging
         db = motor_client[settings.mongo_db_name]
         stats = await db.command('dbStats')
         
+        # Log detailed database information
+        logger.info(f"Database health check successful - "
+                   f"Database: {settings.mongo_db_name}, "
+                   f"Host: {settings.mongo_host}:{settings.mongo_port}, "
+                   f"Collections: {stats.get('collections', 0)}, "
+                   f"Data size: {stats.get('dataSize', 0)} bytes")
+        
         return {
             "status": "healthy",
-            "database": settings.mongo_db_name,
-            "host": settings.mongo_host,
-            "port": settings.mongo_port,
-            "collections": stats.get('collections', 0),
-            "data_size": stats.get('dataSize', 0)
+            "message": "Database connection established successfully"
         }
         
     except Exception as e:
+        logger.error(f"Database health check failed: {str(e)}")
         return {
             "status": "unhealthy", 
-            "error": str(e)
+            "message": "Database connection failed"
         }

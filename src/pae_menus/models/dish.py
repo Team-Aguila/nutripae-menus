@@ -6,10 +6,28 @@ from datetime import datetime
 from .commons import Recipe, MealType
 
 class DishStatus(str, Enum):
+    """
+    Dish status values.
+    
+    Values:
+    - active: Dish is available for use in menus
+    - inactive: Dish is not available for new menus (soft deleted)
+    """
     ACTIVE = "active"
     INACTIVE = "inactive"
 
 class DishType(str, Enum):
+    """
+    Dish type categories for nutritional classification.
+    
+    Values:
+    - protein: Protein-rich dishes (meat, fish, eggs, legumes)
+    - cereal: Cereal and grain-based dishes (rice, pasta, bread)
+    - vegetable: Vegetable-based dishes and salads
+    - fruit: Fruit-based dishes and desserts
+    - dairy: Dairy-based dishes (yogurt, cheese, milk)
+    - other: Other types not covered by main categories
+    """
     PROTEIN = "protein"
     CEREAL = "cereal"
     VEGETABLE = "vegetable"

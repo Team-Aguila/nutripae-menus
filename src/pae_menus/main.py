@@ -27,7 +27,7 @@ app.include_router(ingredients_router)
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to the PAE Coverage API"}
+    return {"message": "Welcome to the PAE Menus API"}
 
 @app.get("/health")
 def health_check():

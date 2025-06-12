@@ -4,6 +4,14 @@ from typing import List
 from beanie import PydanticObjectId
 
 class MealType(str, Enum):
+    """
+    Meal types for dish categorization.
+    
+    Values:
+    - desayuno: Breakfast meal
+    - almuerzo: Lunch meal  
+    - refrigerio: Snack meal
+    """
     BREAKFAST = "desayuno"
     LUNCH = "almuerzo"
     SNACK = "refrigerio"

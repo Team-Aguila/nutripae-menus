@@ -344,15 +344,15 @@ class IngredientService:
             )
 
     @staticmethod
-    async def reactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+    async def activate_ingredient(ingredient_id: str) -> IngredientResponse:
         """
-        Reactivate an ingredient by setting its status to ACTIVE.
+        Activate an ingredient by setting its status to ACTIVE.
         
         Args:
-            ingredient_id: The ingredient ID to reactivate
+            ingredient_id: The ingredient ID to activate
             
         Returns:
-            IngredientResponse: The reactivated ingredient
+            IngredientResponse: The activated ingredient
             
         Raises:
             HTTPException: If ingredient not found or already active
@@ -373,7 +373,7 @@ class IngredientService:
                     detail=f"Ingredient '{ingredient.name}' is already active"
                 )
             
-            # Reactivate ingredient
+            # activate ingredient
             ingredient.status = IngredientStatus.ACTIVE
             ingredient.update_timestamp()
             await ingredient.save()

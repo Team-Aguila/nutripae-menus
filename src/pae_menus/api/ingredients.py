@@ -1,7 +1,7 @@
 # pae_menus/api/ingredients.py
 from typing import List, Optional
 from fastapi import APIRouter, Query, HTTPException, status
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
 
 from pae_menus.models.ingredient import (
     IngredientCreate, 
@@ -184,30 +184,40 @@ async def get_ingredient_statistics() -> JSONResponse:
     )
 
 
-@router.get(
+@router.head(
     "/validate/name-uniqueness",
     summary="Check name uniqueness",
-    description="Real-time validation endpoint to check if an ingredient name is unique."
+    description="Check if an ingredient name is unique using HTTP semantics. Returns 200 OK if unique, 409 Conflict if already exists."
 )
 async def check_name_uniqueness(
     name: str = Query(..., description="The ingredient name to check"),
     exclude_id: Optional[str] = Query(None, description="ID to exclude from uniqueness check (for updates)")
-) -> JSONResponse:
+) -> Response:
     """
-    Check if an ingredient name is unique.
+    Check if an ingredient name is unique using HTTP HEAD method.
+    
+    HTTP Status Codes:
+    - **200 OK**: Name is unique and available
+    - **409 Conflict**: Name already exists
+    
+    Headers:
+    - **X-Name-Unique**: "true" if unique, "false" if already exists
     
     - **name**: The ingredient name to validate
     - **exclude_id**: Optional ID to exclude from check (useful for updates)
     """
     is_unique = await IngredientService.check_name_uniqueness(name, exclude_id)
     
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={
-            "is_unique": is_unique,
-            "message": "Name is available" if is_unique else f"Name '{name}' is already taken"
-        }
-    )
+    if is_unique:
+        return Response(
+            status_code=status.HTTP_200_OK,
+            headers={"X-Name-Unique": "true"}
+        )
+    else:
+        return Response(
+            status_code=status.HTTP_409_CONFLICT,
+            headers={"X-Name-Unique": "false"}
+        )
 
 
 @router.get(
@@ -315,19 +325,19 @@ async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
 @router.patch(
     "/{ingredient_id}/activate",
     response_model=IngredientResponse,
-    summary="Reactivate an ingredient",
+    summary="Activate an ingredient",
     description="Mark an inactive ingredient as active again, making it available for new menus."
 )
-async def reactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+async def activate_ingredient(ingredient_id: str) -> IngredientResponse:
     """
-    Reactivate an ingredient.
+    Activate an ingredient.
     
     This action:
     - Marks the ingredient status as ACTIVE
     - Makes the ingredient available for new menus again
     - Updates the timestamp
     
-    - **ingredient_id**: The unique identifier of the ingredient to reactivate
+    - **ingredient_id**: The unique identifier of the ingredient to activate
     """
-    ingredient = await IngredientService.reactivate_ingredient(ingredient_id)
+    ingredient = await IngredientService.activate_ingredient(ingredient_id)
     return ingredient 
