@@ -10,10 +10,14 @@ class MenuScheduleStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+class LocationType(str, Enum):
+    CAMPUS = "campus"
+    TOWN = "town"
+
 class Coverage(BaseModel):
-    # Assuming location_id refers to a "Sede" or "Municipio"
-    location_id: str = Field(..., description="Identifier for the location (e.g., Sede ID)")
-    
+    location_id: str = Field(..., description="Identifier for the location (Campus ID or Town ID)")
+    location_type: LocationType = Field(..., description="Type of location - campus or town")
+    location_name: str = Field(..., description="Display name of the location")
 
 class CancellationInfo(BaseModel):
     reason: Optional[str] = Field(None, description="Reason for cancellation")
@@ -36,6 +40,37 @@ class MenuScheduleBase(BaseModel):
             raise ValueError('End date cannot be before start date')
         return v
 
+    @field_validator('coverage')
+    @classmethod
+    def validate_coverage(cls, v):
+        if not v:
+            raise ValueError('At least one location must be selected')
+        return v
+
+class MenuScheduleAssignmentRequest(BaseModel):
+    menu_cycle_id: str = Field(..., description="ID of the menu cycle to assign")
+    campus_ids: List[str] = Field(default=[], description="List of campus IDs to assign")
+    town_ids: List[str] = Field(default=[], description="List of town IDs to assign") 
+    start_date: date = Field(..., description="Start date of the assignment")
+    end_date: date = Field(..., description="End date of the assignment")
+
+    @field_validator('end_date')
+    @classmethod
+    def validate_dates(cls, v, values):
+        if 'start_date' in values.data and v < values.data['start_date']:
+            raise ValueError('End date cannot be before start date')
+        return v
+
+    @field_validator('campus_ids', 'town_ids')
+    @classmethod
+    def validate_locations(cls, v, values):
+        # Check that at least one campus or town is selected
+        if 'campus_ids' in values.data and 'town_ids' in values.data:
+            if not values.data['campus_ids'] and not values.data['town_ids']:
+                raise ValueError('At least one campus or town must be selected')
+        elif not v:  # If this is the first field being validated
+            return v  # Let the other validator handle the check
+        return v
 
 class MenuScheduleCreate(MenuScheduleBase):
     pass
@@ -78,3 +113,66 @@ class MenuScheduleResponse(MenuScheduleBase):
 
     class Config:
         populate_by_name = True 
+
+class LocationInfo(BaseModel):
+    id: str
+    name: str
+    location_type: LocationType
+
+class MenuScheduleAssignmentSummary(BaseModel):
+    menu_cycle_id: str
+    menu_cycle_name: str
+    locations: List[LocationInfo]
+    start_date: date
+    end_date: date
+    duration_days: int
+    schedule_id: str
+
+# New models for citizen menu consultation
+class DishInMenu(BaseModel):
+    id: str = Field(..., description="Dish ID")
+    name: str = Field(..., description="Dish name")
+    description: Optional[str] = Field(None, description="Dish description")
+    nutritional_info: Optional[dict] = Field(None, description="Nutritional information including calories, protein, and photo URL")
+
+class MealMenuDetails(BaseModel):
+    meal_type: str = Field(..., description="Type of meal (breakfast, lunch, snack)")
+    dishes: List[DishInMenu] = Field(..., description="List of dishes for this meal")
+
+class CitizenMenuResponse(BaseModel):
+    location_id: str = Field(..., description="Location ID")
+    location_name: str = Field(..., description="Location name") 
+    location_type: str = Field(..., description="Location type (campus or town)")
+    menu_date: date = Field(..., description="Date for which the menu is shown")
+    menu_cycle_name: str = Field(..., description="Name of the menu cycle")
+    breakfast: List[DishInMenu] = Field(..., description="Breakfast dishes")
+    lunch: List[DishInMenu] = Field(..., description="Lunch dishes")
+    snack: List[DishInMenu] = Field(..., description="Snack dishes")
+    is_available: bool = Field(..., description="Whether a menu is available for this date and location")
+    message: Optional[str] = Field(None, description="Additional information or reasons why menu might not be available")
+
+# New models for administrator/supervisor detailed schedule view
+class DailyMenuByLocation(BaseModel):
+    location_id: str = Field(..., description="Location ID")
+    location_name: str = Field(..., description="Location name")
+    location_type: str = Field(..., description="Location type (campus or town)")
+    menu_date: date = Field(..., description="Date for this daily menu")
+    cycle_day: int = Field(..., description="Day number in the menu cycle")
+    breakfast: List[DishInMenu] = Field(..., description="Breakfast dishes for this day and location")
+    lunch: List[DishInMenu] = Field(..., description="Lunch dishes for this day and location")
+    snack: List[DishInMenu] = Field(..., description="Snack dishes for this day and location")
+
+class ScheduleDetailedResponse(BaseModel):
+    id: str = Field(..., description="Schedule ID")
+    menu_cycle_id: str = Field(..., description="Menu cycle ID")
+    menu_cycle_name: str = Field(..., description="Menu cycle name")
+    coverage: List[Coverage] = Field(..., description="Coverage locations")
+    start_date: date = Field(..., description="Schedule start date")
+    end_date: date = Field(..., description="Schedule end date")
+    status: MenuScheduleStatus = Field(..., description="Schedule status")
+    cancellation_info: Optional[CancellationInfo] = Field(None, description="Cancellation details if applicable")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+    daily_menus: List[DailyMenuByLocation] = Field(..., description="Daily effective menus by location and date")
+    total_days: int = Field(..., description="Total number of days in the schedule")
+    total_locations: int = Field(..., description="Total number of locations covered") 

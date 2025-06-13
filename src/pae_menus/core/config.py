@@ -5,6 +5,10 @@ from pydantic import Field
 class Settings(BaseSettings):
     """Application settings with MongoDB configuration"""
     
+    # Server Configuration
+    server_host: str = Field(default="0.0.0.0", description="Server host")
+    server_port: int = Field(default=8001, description="Server port")
+    
     # MongoDB Configuration
     mongo_host: str = Field(default="localhost", description="MongoDB host")
     mongo_port: int = Field(default=27017, description="MongoDB port")
