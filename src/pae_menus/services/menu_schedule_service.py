@@ -77,6 +77,12 @@ class MenuScheduleService:
         if assignment_request.town_ids:
             validated_towns = await self.coverage_service.validate_town_ids(assignment_request.town_ids)
 
+        # 3.1. Validate geographic consistency (campuses belong to institutions in specified towns)
+        await self.coverage_service.validate_geographic_consistency(
+            assignment_request.campus_ids, 
+            assignment_request.town_ids
+        )
+
         # 4. Check for overlapping schedules
         await self._check_overlapping_schedules(
             assignment_request.campus_ids,
@@ -413,6 +419,9 @@ class MenuScheduleService:
                 if town_ids:
                     await self.coverage_service.validate_town_ids(town_ids)
 
+                # Validate geographic consistency (campuses belong to institutions in specified towns)
+                await self.coverage_service.validate_geographic_consistency(campus_ids, town_ids)
+
                 validated_coverage = schedule_data.coverage
 
             # 4. Check for overlapping schedules if coverage or end_date is being updated
@@ -533,6 +542,9 @@ class MenuScheduleService:
 
             # Only check for overlaps if the schedule would be active or future
             if new_status in [MenuScheduleStatus.ACTIVE, MenuScheduleStatus.FUTURE]:
+                # Validate geographic consistency before uncancelling
+                await self.coverage_service.validate_geographic_consistency(campus_ids, town_ids)
+                
                 await self._check_overlapping_schedules(
                     campus_ids=campus_ids,
                     town_ids=town_ids,

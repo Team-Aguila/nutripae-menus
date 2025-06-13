@@ -37,6 +37,7 @@ async def assign_menu_cycle(
     This endpoint creates a new menu schedule assignment with:
     - Active menu cycle validation
     - Location validation (campuses and/or towns)
+    - Geographic consistency validation (campuses must belong to institutions in specified towns)
     - Date range validation (start < end)
     - Overlap conflict detection
     
@@ -46,6 +47,10 @@ async def assign_menu_cycle(
     - town_ids: List of town IDs (optional)
     - start_date: Assignment start date
     - end_date: Assignment end date
+    
+    **Geographic Validation**: When both campuses and towns are specified, the system 
+    validates that each campus belongs to an institution located in one of the specified towns.
+    This ensures geographic consistency and prevents invalid location combinations.
     
     Returns a summary with assigned locations, dates, and the created schedule ID.
     """
