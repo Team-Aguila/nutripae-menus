@@ -46,7 +46,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-app.include_router(api_router)
+app.include_router(api_router, prefix="/api/v1")
 
 @app.get("/")
 def read_root():
@@ -59,4 +59,9 @@ def health_check():
 @app.get("/health/database")
 async def database_health_check():
     """Check database connection health"""
-    return await db_health_check()
+    try:
+        # Simple database connection test
+        await app.mongodb.list_collection_names()
+        return {"status": "healthy", "database": "connected"}
+    except Exception as e:
+        return {"status": "unhealthy", "database": "disconnected", "error": str(e)}

@@ -12,7 +12,7 @@ from pae_menus.models.ingredient import (
 )
 from pae_menus.services.ingredient_service import IngredientService
 
-router = APIRouter(tags=["ingredients"])
+router = APIRouter()
 
 
 @router.post(
