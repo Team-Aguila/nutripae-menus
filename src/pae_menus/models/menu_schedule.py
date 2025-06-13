@@ -126,4 +126,27 @@ class MenuScheduleAssignmentSummary(BaseModel):
     start_date: date
     end_date: date
     duration_days: int
-    schedule_id: str 
+    schedule_id: str
+
+# New models for citizen menu consultation
+class DishInMenu(BaseModel):
+    id: str = Field(..., description="Dish ID")
+    name: str = Field(..., description="Dish name")
+    description: Optional[str] = Field(None, description="Dish description")
+    nutritional_info: Optional[dict] = Field(None, description="Nutritional information including calories, protein, and photo URL")
+
+class MealMenuDetails(BaseModel):
+    meal_type: str = Field(..., description="Type of meal (breakfast, lunch, snack)")
+    dishes: List[DishInMenu] = Field(..., description="List of dishes for this meal")
+
+class CitizenMenuResponse(BaseModel):
+    location_id: str = Field(..., description="Location ID")
+    location_name: str = Field(..., description="Location name") 
+    location_type: str = Field(..., description="Location type (campus or town)")
+    menu_date: date = Field(..., description="Date for which the menu is shown")
+    menu_cycle_name: str = Field(..., description="Name of the menu cycle")
+    breakfast: List[DishInMenu] = Field(..., description="Breakfast dishes")
+    lunch: List[DishInMenu] = Field(..., description="Lunch dishes")
+    snack: List[DishInMenu] = Field(..., description="Snack dishes")
+    is_available: bool = Field(..., description="Whether a menu is available for this date and location")
+    message: Optional[str] = Field(None, description="Additional information or reasons why menu might not be available") 

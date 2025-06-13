@@ -1,12 +1,15 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from typing import List, Optional
+from datetime import date
 
 from ..models.menu_schedule import (
     MenuScheduleAssignmentRequest,
     MenuScheduleAssignmentSummary,
     MenuScheduleResponse,
     MenuScheduleUpdate,
-    MenuScheduleStatus
+    MenuScheduleStatus,
+    CitizenMenuResponse,
+    LocationType
 )
 from ..services.menu_schedule_service import menu_schedule_service, MenuScheduleService
 from ..services.coverage_service import coverage_service, CoverageService
@@ -184,6 +187,48 @@ async def uncancel_schedule(
     **reason**: Optional reason for uncancelling (for audit purposes)
     """
     return await service.uncancel_schedule(schedule_id, reason)
+
+@router.get(
+    "/citizen/menu",
+    response_model=CitizenMenuResponse,
+    summary="Get effective menu for citizens",
+    description="Get the effective menu for a specific location and date for citizen consultation."
+)
+async def get_citizen_menu(
+    location_id: str = Query(..., description="Location ID (campus or town ID)"),
+    location_type: LocationType = Query(..., description="Location type: 'campus' or 'town'"),
+    date: date = Query(..., description="Date to get the menu for (YYYY-MM-DD format)"),
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+) -> CitizenMenuResponse:
+    """
+    Get the effective menu for a specific location and date.
+    
+    This endpoint allows citizens to consult what menu is being served
+    at a specific location (campus or town) on a given date.
+    
+    The response includes:
+    - Breakfast dishes with details
+    - Lunch dishes with details  
+    - Snack dishes with details
+    - Nutritional information when available
+    - Location and date information
+    - Availability status and helpful messages
+    
+    **location_id**: The unique identifier of the campus or town
+    **location_type**: Must be either 'campus' or 'town'
+    **date**: The date to query in YYYY-MM-DD format
+    
+    The system will:
+    1. Find the active menu schedule for the location and date
+    2. Determine which day of the menu cycle corresponds to the date
+    3. Return the breakfast, lunch, and snack dishes for that day
+    4. Include dish details like name, description, and nutritional info
+    
+    If no menu is available for the specified location and date,
+    the response will indicate this with is_available=false and
+    provide a helpful message explaining why.
+    """
+    return await service.get_effective_menu_for_citizen(location_id, location_type.value, date)
 
 @router.delete(
     "/{schedule_id}",

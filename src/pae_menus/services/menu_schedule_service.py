@@ -13,7 +13,9 @@ from pae_menus.models.menu_schedule import (
     MenuScheduleAssignmentSummary,
     Coverage,
     LocationType,
-    LocationInfo
+    LocationInfo,
+    CitizenMenuResponse,
+    DishInMenu
 )
 from pae_menus.models.menu_cycle import MenuCycle, MenuCycleStatus
 from pae_menus.services.coverage_service import coverage_service, CoverageService
@@ -456,6 +458,173 @@ class MenuScheduleService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid schedule ID format"
             )
+
+    async def get_effective_menu_for_citizen(
+        self, 
+        location_id: str, 
+        location_type: str, 
+        query_date: date
+    ) -> "CitizenMenuResponse":
+        """
+        Get the effective menu for a specific location and date for citizen consultation.
+        
+        This method:
+        1. Finds the active menu schedule for the location and date
+        2. Gets the corresponding menu cycle
+        3. Calculates which day of the cycle corresponds to the requested date
+        4. Retrieves dish details for breakfast, lunch, and snack
+        5. Returns organized menu information
+        
+        Args:
+            location_id: The campus or town ID
+            location_type: Either "campus" or "town"
+            query_date: The date for which to get the menu
+            
+        Returns:
+            CitizenMenuResponse: The effective menu for the date and location
+        """
+        from pae_menus.models.menu_cycle import MenuCycle
+        from pae_menus.models.dish import Dish
+        
+        try:
+            # 1. Find active menu schedule for this location and date
+            query = {
+                "coverage.location_id": location_id,
+                "coverage.location_type": location_type.lower(),
+                "start_date": {"$lte": query_date},
+                "end_date": {"$gte": query_date},
+                "status": {"$in": [MenuScheduleStatus.ACTIVE, MenuScheduleStatus.FUTURE]}
+            }
+            
+            schedule = await MenuSchedule.find_one(query)
+            
+            if not schedule:
+                # Try to get location name from coverage service for better response
+                location_name = "Unknown Location"
+                try:
+                    if location_type.lower() == "campus":
+                        campuses = await self.coverage_service.validate_campus_ids([location_id])
+                        if campuses:
+                            location_name = campuses[0].name
+                    elif location_type.lower() == "town":
+                        towns = await self.coverage_service.validate_town_ids([location_id])
+                        if towns:
+                            location_name = towns[0].name
+                except:
+                    pass  # Keep default location name if validation fails
+                
+                return CitizenMenuResponse(
+                    location_id=location_id,
+                    location_name=location_name,
+                    location_type=location_type,
+                    menu_date=query_date,
+                    menu_cycle_name="",
+                    breakfast=[],
+                    lunch=[],
+                    snack=[],
+                    is_available=False,
+                    message=f"No menu schedule found for this location and date. Please check if the date is within an active menu period."
+                )
+            
+            # Get location name from the schedule coverage
+            location_name = "Unknown Location"
+            for coverage in schedule.coverage:
+                if coverage.location_id == location_id:
+                    location_name = coverage.location_name
+                    break
+            
+            # 2. Get the menu cycle
+            menu_cycle = await MenuCycle.get(schedule.menu_cycle_id)
+            if not menu_cycle:
+                return CitizenMenuResponse(
+                    location_id=location_id,
+                    location_name=location_name,
+                    location_type=location_type,
+                    menu_date=query_date,
+                    menu_cycle_name="",
+                    breakfast=[],
+                    lunch=[],
+                    snack=[],
+                    is_available=False,
+                    message="Menu cycle not found. Please contact administration."
+                )
+            
+            # 3. Calculate which day of the cycle corresponds to the requested date
+            days_since_start = (query_date - schedule.start_date).days
+            cycle_day = (days_since_start % menu_cycle.duration_days) + 1
+            
+            # 4. Find the daily menu for this day
+            daily_menu = None
+            for dm in menu_cycle.daily_menus:
+                if dm.day == cycle_day:
+                    daily_menu = dm
+                    break
+            
+            if not daily_menu:
+                return CitizenMenuResponse(
+                    location_id=location_id,
+                    location_name=location_name,
+                    location_type=location_type,
+                    menu_date=query_date,
+                    menu_cycle_name=menu_cycle.name,
+                    breakfast=[],
+                    lunch=[],
+                    snack=[],
+                    is_available=False,
+                    message=f"No menu configured for day {cycle_day} of the cycle."
+                )
+            
+            # 5. Get dish details for each meal type
+            breakfast_dishes = await self._get_dish_details(daily_menu.breakfast_dish_ids)
+            lunch_dishes = await self._get_dish_details(daily_menu.lunch_dish_ids)
+            snack_dishes = await self._get_dish_details(daily_menu.snack_dish_ids)
+            
+            return CitizenMenuResponse(
+                location_id=location_id,
+                location_name=location_name,
+                location_type=location_type,
+                menu_date=query_date,
+                menu_cycle_name=menu_cycle.name,
+                breakfast=breakfast_dishes,
+                lunch=lunch_dishes,
+                snack=snack_dishes,
+                is_available=True,
+                message=None
+            )
+            
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error retrieving menu: {str(e)}"
+            )
+    
+    async def _get_dish_details(self, dish_ids: List[PydanticObjectId]) -> List["DishInMenu"]:
+        """Helper method to get dish details and convert to DishInMenu format"""
+        from pae_menus.models.dish import Dish
+        
+        if not dish_ids:
+            return []
+        
+        dishes = await Dish.find({"_id": {"$in": dish_ids}}).to_list()
+        
+        dish_in_menu_list = []
+        for dish in dishes:
+            nutritional_info = None
+            if dish.nutritional_info:
+                nutritional_info = {
+                    "calories": dish.nutritional_info.calories,
+                    "protein": dish.nutritional_info.protein,
+                    "photo_url": dish.nutritional_info.photo_url
+                }
+            
+            dish_in_menu_list.append(DishInMenu(
+                id=str(dish.id),
+                name=dish.name,
+                description=dish.description,
+                nutritional_info=nutritional_info
+            ))
+        
+        return dish_in_menu_list
 
 # Create singleton instance
 menu_schedule_service = MenuScheduleService() 

@@ -33,14 +33,14 @@ Backend API for managing PAE (Programa de Alimentación Escolar) menus module.
    poetry run poe dev
    ```
 
-The API will be available at `http://localhost:8000`
+The API will be available at `http://localhost:8001`
 
 ## 📚 API Documentation
 
 Once the application is running, you can access the full API documentation:
 
-- **Swagger UI**: `http://localhost:8000/docs`
-- **ReDoc**: `http://localhost:8000/redoc`
+- **Swagger UI**: `http://localhost:8001/docs`
+- **ReDoc**: `http://localhost:8001/redoc`
 
 ## 🛠️ Development
 
