@@ -35,13 +35,13 @@ class CoverageService:
         self.base_url = base_url
         self.api_base = f"{base_url}/api/v1"
     
-    async def _make_request(self, endpoint: str, method: str = "GET", **kwargs) -> Dict[Any, Any]:
+    async def _make_request(self, endpoint: str, method: str = "GET", params: Optional[Dict] = None, **kwargs) -> Dict[Any, Any]:
         """Make HTTP request to coverage service"""
         url = f"{self.api_base}/{endpoint}"
         
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.request(method, url, **kwargs) as response:
+                async with session.request(method, url, params=params, **kwargs) as response:
                     if response.status == 200:
                         return await response.json()
                     elif response.status == 404:
@@ -65,7 +65,7 @@ class CoverageService:
     
     async def get_towns(self, skip: int = 0, limit: int = 1000) -> List[TownInfo]:
         """Get all towns from coverage service"""
-        data = await self._make_request(f"towns/?skip={skip}&limit={limit}")
+        data = await self._make_request("towns/", params={"skip": skip, "limit": limit})
         return [TownInfo(**town) for town in data]
     
     async def get_town_by_id(self, town_id: int) -> TownInfo:
@@ -75,7 +75,7 @@ class CoverageService:
     
     async def get_campuses(self, skip: int = 0, limit: int = 1000) -> List[CampusInfo]:
         """Get all campuses from coverage service"""
-        data = await self._make_request(f"campuses/?skip={skip}&limit={limit}")
+        data = await self._make_request("campuses/", params={"skip": skip, "limit": limit})
         return [CampusInfo(**campus) for campus in data]
     
     async def get_campus_by_id(self, campus_id: int) -> CampusInfo:
@@ -85,7 +85,7 @@ class CoverageService:
     
     async def get_institutions(self, skip: int = 0, limit: int = 1000) -> List[InstitutionInfo]:
         """Get all institutions from coverage service"""
-        data = await self._make_request(f"institutions/?skip={skip}&limit={limit}")
+        data = await self._make_request("institutions/", params={"skip": skip, "limit": limit})
         return [InstitutionInfo(**institution) for institution in data]
     
     async def get_institution_by_id(self, institution_id: int) -> InstitutionInfo:

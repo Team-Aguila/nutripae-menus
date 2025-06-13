@@ -9,7 +9,7 @@ from ..models.menu_schedule import (
     MenuScheduleStatus
 )
 from ..services.menu_schedule_service import menu_schedule_service, MenuScheduleService
-from ..services.coverage_service import coverage_service, CoverageService, TownInfo, CampusInfo
+from ..services.coverage_service import coverage_service, CoverageService
 
 router = APIRouter(
     tags=["Menu Schedules"],
@@ -113,11 +113,17 @@ async def update_schedule(
     """
     Update a menu schedule.
     
-    This endpoint allows updating:
-    - Coverage locations
-    - End date (must be after start date)
+    This endpoint allows updating active or future schedules with:
+    - Coverage locations (validates location existence and checks for overlaps)
+    - End date (must be after start date, validates no overlaps)
     - Status
     - Cancellation information
+    
+    Business Rules:
+    - Only ACTIVE or FUTURE schedules can be edited
+    - Updates to coverage or end date trigger overlap validation
+    - At least one location must be selected if coverage is updated
+    - All location IDs must exist in the coverage service
     
     **schedule_id**: The unique identifier of the menu schedule to update
     **schedule_data**: The update data
@@ -148,42 +154,64 @@ async def cancel_schedule(
     """
     return await service.cancel_schedule(schedule_id, reason)
 
-# Helper endpoints for the assignment form
-
-@router.get(
-    "/locations/towns",
-    response_model=List[TownInfo],
-    summary="Get available towns",
-    description="Get all available towns for menu assignment."
+@router.patch(
+    "/{schedule_id}/uncancel",
+    response_model=MenuScheduleResponse,
+    summary="Uncancel a menu schedule",
+    description="Restore a cancelled menu schedule to its appropriate status."
 )
-async def get_towns(
-    skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(1000, ge=1, le=1000, description="Maximum number of records to return"),
-    coverage_svc: CoverageService = Depends(lambda: coverage_service)
-) -> List[TownInfo]:
+async def uncancel_schedule(
+    schedule_id: str,
+    reason: Optional[str] = Query(None, description="Reason for uncancelling"),
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+) -> MenuScheduleResponse:
     """
-    Get all available towns for assignment.
+    Uncancel a menu schedule.
     
-    **skip**: Number of records to skip for pagination
-    **limit**: Maximum number of records to return
+    This action:
+    - Restores a cancelled schedule to an editable status
+    - Clears cancellation information
+    - Validates that no overlapping schedules exist before restoration
+    - Sets status to FUTURE (if start date is future) or ACTIVE (if start date is today/past)
+    
+    Business Rules:
+    - Only cancelled schedules can be uncancelled
+    - Validates no overlapping schedules exist for the same locations and dates
+    - Prioritizes making the schedule editable for administrative adjustments
+    - ACTIVE status allows immediate editing of dates and coverage
+    
+    **schedule_id**: The unique identifier of the menu schedule to uncancel
+    **reason**: Optional reason for uncancelling (for audit purposes)
     """
-    return await coverage_svc.get_towns(skip=skip, limit=limit)
+    return await service.uncancel_schedule(schedule_id, reason)
 
-@router.get(
-    "/locations/campuses",
-    response_model=List[CampusInfo],
-    summary="Get available campuses",
-    description="Get all available campuses for menu assignment."
+@router.delete(
+    "/{schedule_id}",
+    status_code=status.HTTP_200_OK,
+    summary="Delete a menu schedule",
+    description="Permanently delete a menu schedule from the system."
 )
-async def get_campuses(
-    skip: int = Query(0, ge=0, description="Number of records to skip"),
-    limit: int = Query(1000, ge=1, le=1000, description="Maximum number of records to return"),
-    coverage_svc: CoverageService = Depends(lambda: coverage_service)
-) -> List[CampusInfo]:
+async def delete_schedule(
+    schedule_id: str,
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+) -> dict:
     """
-    Get all available campuses for assignment.
+    Delete a menu schedule.
     
-    **skip**: Number of records to skip for pagination
-    **limit**: Maximum number of records to return
+    This action permanently removes the menu schedule from the system.
+    
+    **WARNING**: This is a permanent action and cannot be undone.
+    
+    Business Rules:
+    - Schedules in any status can be deleted (ACTIVE, FUTURE, COMPLETED, CANCELLED)
+    - Deletion removes all schedule data including coverage and cancellation information
+    - Returns confirmation with deleted schedule details
+    
+    **schedule_id**: The unique identifier of the menu schedule to delete
+    
+    Returns:
+    - Confirmation message with details of the deleted schedule
     """
-    return await coverage_svc.get_campuses(skip=skip, limit=limit) 
+    return await service.delete_schedule(schedule_id)
+
+ 
