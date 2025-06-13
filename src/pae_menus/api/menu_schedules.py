@@ -9,7 +9,8 @@ from ..models.menu_schedule import (
     MenuScheduleUpdate,
     MenuScheduleStatus,
     CitizenMenuResponse,
-    LocationType
+    LocationType,
+    ScheduleDetailedResponse
 )
 from ..services.menu_schedule_service import menu_schedule_service, MenuScheduleService
 from ..services.coverage_service import coverage_service, CoverageService
@@ -60,23 +61,46 @@ async def get_all_schedules(
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     status: Optional[MenuScheduleStatus] = Query(None, description="Filter by schedule status"),
+    menu_cycle_id: Optional[str] = Query(None, description="Filter by menu cycle ID"),
+    location_id: Optional[str] = Query(None, description="Filter by location ID (campus or town)"),
+    location_type: Optional[LocationType] = Query(None, description="Filter by location type"),
+    start_date_from: Optional[date] = Query(None, description="Filter schedules starting from this date"),
+    start_date_to: Optional[date] = Query(None, description="Filter schedules starting up to this date"),
+    end_date_from: Optional[date] = Query(None, description="Filter schedules ending from this date"),
+    end_date_to: Optional[date] = Query(None, description="Filter schedules ending up to this date"),
     service: MenuScheduleService = Depends(lambda: menu_schedule_service)
 ) -> List[MenuScheduleResponse]:
     """
-    Get all menu schedules with optional filtering.
+    Get all menu schedules with enhanced filtering for administrators.
     
     This endpoint returns menu schedules based on filtering criteria:
     - Pagination (skip/limit)
     - Status filter (active/future/completed/cancelled)
+    - Menu cycle filter (by cycle ID)
+    - Location filter (by location ID and/or type)
+    - Date range filters (start and end dates)
     
     **skip**: Number of records to skip for pagination
     **limit**: Maximum number of records to return
     **status**: Filter by schedule status
+    **menu_cycle_id**: Filter by specific menu cycle
+    **location_id**: Filter by specific location (campus or town)
+    **location_type**: Filter by location type (campus/town)
+    **start_date_from/to**: Filter by schedule start date range
+    **end_date_from/to**: Filter by schedule end date range
     """
+    location_type_value = location_type.value if location_type else None
     return await service.get_all_schedules(
         skip=skip,
         limit=limit,
-        status_filter=status
+        status_filter=status,
+        menu_cycle_id=menu_cycle_id,
+        location_id=location_id,
+        location_type=location_type_value,
+        start_date_from=start_date_from,
+        start_date_to=start_date_to,
+        end_date_from=end_date_from,
+        end_date_to=end_date_to
     )
 
 @router.get(
@@ -101,6 +125,41 @@ async def get_schedule(
     **schedule_id**: The unique identifier of the menu schedule
     """
     return await service.get_schedule_by_id(schedule_id)
+
+@router.get(
+    "/{schedule_id}/detailed",
+    response_model=ScheduleDetailedResponse,
+    summary="Get detailed schedule view with daily effective menus",
+    description="Get comprehensive schedule details with daily effective menus for administrators."
+)
+async def get_schedule_detailed(
+    schedule_id: str,
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+) -> ScheduleDetailedResponse:
+    """
+    Get detailed schedule view with daily effective menus for administrators.
+    
+    This endpoint provides a comprehensive view of a menu schedule including:
+    - Basic schedule information (dates, status, coverage)
+    - Menu cycle details
+    - Daily effective menus for each location and date
+    - Dishes served (breakfast, lunch, snack) for each day and location
+    - Nutritional information when available
+    - Summary statistics (total days, total locations)
+    
+    This is specifically designed for administrators, planners, and supervisors
+    to supervise and validate the execution of scheduled menus.
+    
+    **schedule_id**: The unique identifier of the menu schedule
+    
+    The response includes:
+    - Complete schedule metadata
+    - Daily breakdown showing what dishes are served on each date
+    - Location-specific menu information
+    - Cycle day calculations
+    - Summary totals for easy overview
+    """
+    return await service.get_schedule_detailed_view(schedule_id)
 
 @router.patch(
     "/{schedule_id}",

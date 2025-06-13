@@ -183,19 +183,63 @@ class MenuScheduleService:
         self,
         skip: int = 0,
         limit: int = 100,
-        status_filter: Optional[MenuScheduleStatus] = None
+        status_filter: Optional[MenuScheduleStatus] = None,
+        menu_cycle_id: Optional[str] = None,
+        location_id: Optional[str] = None,
+        location_type: Optional[str] = None,
+        start_date_from: Optional[date] = None,
+        start_date_to: Optional[date] = None,
+        end_date_from: Optional[date] = None,
+        end_date_to: Optional[date] = None
     ) -> List[MenuScheduleResponse]:
-        """Get all menu schedules with optional filtering"""
+        """Get all menu schedules with enhanced filtering for administrators"""
         
         query = {}
+        
+        # Status filter
         if status_filter:
             query["status"] = status_filter.value
+        
+        # Menu cycle filter
+        if menu_cycle_id:
+            try:
+                query["menu_cycle_id"] = PydanticObjectId(menu_cycle_id)
+            except ValueError:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Invalid menu cycle ID format"
+                )
+        
+        # Location coverage filter
+        if location_id and location_type:
+            query["coverage"] = {
+                "$elemMatch": {
+                    "location_id": location_id,
+                    "location_type": location_type.lower()
+                }
+            }
+        elif location_id:  # Search in any location type
+            query["coverage.location_id"] = location_id
+        
+        # Date range filters
+        date_conditions = []
+        if start_date_from:
+            date_conditions.append({"start_date": {"$gte": start_date_from}})
+        if start_date_to:
+            date_conditions.append({"start_date": {"$lte": start_date_to}})
+        if end_date_from:
+            date_conditions.append({"end_date": {"$gte": end_date_from}})
+        if end_date_to:
+            date_conditions.append({"end_date": {"$lte": end_date_to}})
+        
+        if date_conditions:
+            query["$and"] = date_conditions
 
         schedules = await MenuSchedule.find(
             query,
             skip=skip,
             limit=limit
-        ).to_list()
+        ).sort("-created_at").to_list()
 
         return [
             MenuScheduleResponse(
@@ -220,6 +264,94 @@ class MenuScheduleService:
                 id=str(schedule.id),
                 **schedule.model_dump(exclude={"id"})
             )
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid schedule ID format"
+            )
+
+    async def get_schedule_detailed_view(self, schedule_id: str) -> "ScheduleDetailedResponse":
+        """Get detailed schedule view with daily effective menus for administrators"""
+        from pae_menus.models.menu_schedule import ScheduleDetailedResponse, DailyMenuByLocation
+        from pae_menus.models.menu_cycle import MenuCycle
+        from datetime import timedelta
+        
+        try:
+            # Get the schedule
+            schedule = await MenuSchedule.get(PydanticObjectId(schedule_id))
+            if not schedule:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Menu schedule with id '{schedule_id}' not found"
+                )
+            
+            # Get the menu cycle
+            menu_cycle = await MenuCycle.get(schedule.menu_cycle_id)
+            if not menu_cycle:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail="Associated menu cycle not found"
+                )
+            
+            # Calculate all dates in the schedule
+            schedule_dates = []
+            current_date = schedule.start_date
+            while current_date <= schedule.end_date:
+                schedule_dates.append(current_date)
+                current_date += timedelta(days=1)
+            
+            # Generate daily menus for each location and date
+            daily_menus = []
+            for location_coverage in schedule.coverage:
+                for schedule_date in schedule_dates:
+                    # Calculate which day of the cycle this date corresponds to
+                    days_since_start = (schedule_date - schedule.start_date).days
+                    cycle_day = (days_since_start % menu_cycle.duration_days) + 1
+                    
+                    # Find the daily menu for this cycle day
+                    daily_menu = None
+                    for dm in menu_cycle.daily_menus:
+                        if dm.day == cycle_day:
+                            daily_menu = dm
+                            break
+                    
+                    if daily_menu:
+                        # Get dish details for each meal type
+                        breakfast_dishes = await self._get_dish_details(daily_menu.breakfast_dish_ids)
+                        lunch_dishes = await self._get_dish_details(daily_menu.lunch_dish_ids)
+                        snack_dishes = await self._get_dish_details(daily_menu.snack_dish_ids)
+                        
+                        daily_menus.append(DailyMenuByLocation(
+                            location_id=location_coverage.location_id,
+                            location_name=location_coverage.location_name,
+                            location_type=location_coverage.location_type.value,
+                            menu_date=schedule_date,
+                            cycle_day=cycle_day,
+                            breakfast=breakfast_dishes,
+                            lunch=lunch_dishes,
+                            snack=snack_dishes
+                        ))
+            
+            # Calculate totals
+            total_days = len(schedule_dates)
+            total_locations = len(schedule.coverage)
+            
+            return ScheduleDetailedResponse(
+                id=str(schedule.id),
+                menu_cycle_id=str(schedule.menu_cycle_id),
+                menu_cycle_name=menu_cycle.name,
+                coverage=schedule.coverage,
+                start_date=schedule.start_date,
+                end_date=schedule.end_date,
+                status=schedule.status,
+                cancellation_info=schedule.cancellation_info,
+                created_at=schedule.created_at,
+                updated_at=schedule.updated_at,
+                daily_menus=daily_menus,
+                total_days=total_days,
+                total_locations=total_locations
+            )
+            
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

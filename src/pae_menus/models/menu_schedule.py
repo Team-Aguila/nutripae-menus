@@ -149,4 +149,30 @@ class CitizenMenuResponse(BaseModel):
     lunch: List[DishInMenu] = Field(..., description="Lunch dishes")
     snack: List[DishInMenu] = Field(..., description="Snack dishes")
     is_available: bool = Field(..., description="Whether a menu is available for this date and location")
-    message: Optional[str] = Field(None, description="Additional information or reasons why menu might not be available") 
+    message: Optional[str] = Field(None, description="Additional information or reasons why menu might not be available")
+
+# New models for administrator/supervisor detailed schedule view
+class DailyMenuByLocation(BaseModel):
+    location_id: str = Field(..., description="Location ID")
+    location_name: str = Field(..., description="Location name")
+    location_type: str = Field(..., description="Location type (campus or town)")
+    menu_date: date = Field(..., description="Date for this daily menu")
+    cycle_day: int = Field(..., description="Day number in the menu cycle")
+    breakfast: List[DishInMenu] = Field(..., description="Breakfast dishes for this day and location")
+    lunch: List[DishInMenu] = Field(..., description="Lunch dishes for this day and location")
+    snack: List[DishInMenu] = Field(..., description="Snack dishes for this day and location")
+
+class ScheduleDetailedResponse(BaseModel):
+    id: str = Field(..., description="Schedule ID")
+    menu_cycle_id: str = Field(..., description="Menu cycle ID")
+    menu_cycle_name: str = Field(..., description="Menu cycle name")
+    coverage: List[Coverage] = Field(..., description="Coverage locations")
+    start_date: date = Field(..., description="Schedule start date")
+    end_date: date = Field(..., description="Schedule end date")
+    status: MenuScheduleStatus = Field(..., description="Schedule status")
+    cancellation_info: Optional[CancellationInfo] = Field(None, description="Cancellation details if applicable")
+    created_at: datetime = Field(..., description="Creation timestamp")
+    updated_at: datetime = Field(..., description="Last update timestamp")
+    daily_menus: List[DailyMenuByLocation] = Field(..., description="Daily effective menus by location and date")
+    total_days: int = Field(..., description="Total number of days in the schedule")
+    total_locations: int = Field(..., description="Total number of locations covered") 
