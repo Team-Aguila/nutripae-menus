@@ -10,10 +10,14 @@ class MenuScheduleStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+class LocationType(str, Enum):
+    CAMPUS = "campus"
+    TOWN = "town"
+
 class Coverage(BaseModel):
-    # Assuming location_id refers to a "Sede" or "Municipio"
-    location_id: str = Field(..., description="Identifier for the location (e.g., Sede ID)")
-    
+    location_id: str = Field(..., description="Identifier for the location (Campus ID or Town ID)")
+    location_type: LocationType = Field(..., description="Type of location - campus or town")
+    location_name: str = Field(..., description="Display name of the location")
 
 class CancellationInfo(BaseModel):
     reason: Optional[str] = Field(None, description="Reason for cancellation")
@@ -36,6 +40,37 @@ class MenuScheduleBase(BaseModel):
             raise ValueError('End date cannot be before start date')
         return v
 
+    @field_validator('coverage')
+    @classmethod
+    def validate_coverage(cls, v):
+        if not v:
+            raise ValueError('At least one location must be selected')
+        return v
+
+class MenuScheduleAssignmentRequest(BaseModel):
+    menu_cycle_id: str = Field(..., description="ID of the menu cycle to assign")
+    campus_ids: List[str] = Field(default=[], description="List of campus IDs to assign")
+    town_ids: List[str] = Field(default=[], description="List of town IDs to assign") 
+    start_date: date = Field(..., description="Start date of the assignment")
+    end_date: date = Field(..., description="End date of the assignment")
+
+    @field_validator('end_date')
+    @classmethod
+    def validate_dates(cls, v, values):
+        if 'start_date' in values.data and v < values.data['start_date']:
+            raise ValueError('End date cannot be before start date')
+        return v
+
+    @field_validator('campus_ids', 'town_ids')
+    @classmethod
+    def validate_locations(cls, v, values):
+        # Check that at least one campus or town is selected
+        if 'campus_ids' in values.data and 'town_ids' in values.data:
+            if not values.data['campus_ids'] and not values.data['town_ids']:
+                raise ValueError('At least one campus or town must be selected')
+        elif not v:  # If this is the first field being validated
+            return v  # Let the other validator handle the check
+        return v
 
 class MenuScheduleCreate(MenuScheduleBase):
     pass
@@ -78,3 +113,17 @@ class MenuScheduleResponse(MenuScheduleBase):
 
     class Config:
         populate_by_name = True 
+
+class LocationInfo(BaseModel):
+    id: str
+    name: str
+    location_type: LocationType
+
+class MenuScheduleAssignmentSummary(BaseModel):
+    menu_cycle_id: str
+    menu_cycle_name: str
+    locations: List[LocationInfo]
+    start_date: date
+    end_date: date
+    duration_days: int
+    schedule_id: str 

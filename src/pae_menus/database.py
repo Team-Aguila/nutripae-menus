@@ -5,7 +5,7 @@ from beanie import init_beanie
 from pymongo.errors import ServerSelectionTimeoutError, ConfigurationError
 
 from pae_menus.core.config import settings
-from pae_menus.models import Ingredient
+from pae_menus.models import Ingredient, Dish, MenuCycle, MenuSchedule
 
 # Setup logging
 logger = logging.getLogger(__name__)
@@ -51,7 +51,9 @@ async def init_db() -> None:
         # Initialize Beanie with all document models
         document_models = [
             Ingredient,
-            # Add other document models here as they are created
+            Dish,
+            MenuCycle,
+            MenuSchedule,
         ]
         
         await init_beanie(
