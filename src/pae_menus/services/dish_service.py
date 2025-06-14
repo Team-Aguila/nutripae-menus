@@ -62,7 +62,9 @@ class DishService:
             new_recipe = Recipe(**update_data["recipe"])
             await self._validate_recipe_ingredients(new_recipe.ingredients)
 
-        dish.set(update_data)
+        for field, value in update_data.items():
+            setattr(dish, field, value)
+        
         dish.update_timestamp()
         await dish.save()
         return dish
