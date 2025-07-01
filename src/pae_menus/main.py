@@ -1,6 +1,7 @@
 # pae_menus/main.py
 import logging
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
@@ -44,6 +45,15 @@ app = FastAPI(
     description="Manejo de ingredientes, platos, menús, ciclos de menú y consulta pública.",
     version="1.0.0",
     lifespan=lifespan
+)
+
+# CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Permite todas las origenes
+    allow_credentials=True,
+    allow_methods=["*"],  # Permite todos los métodos
+    allow_headers=["*"],  # Permite todos los headers
 )
 
 app.include_router(api_router, prefix="/api/v1")
