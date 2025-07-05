@@ -40,3 +40,14 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poe.tasks]
 dev = "uvicorn pae_menus.main:app --reload --app-dir src --host 0.0.0.0 --port 8001"
+
+# Database management tasks
+seed = "python -m pae_menus.scripts.seed_database"
+export-db = "python -m pae_menus.scripts.export_database"
+import-db = "python -m pae_menus.scripts.import_database"
+manage-db = "python -m pae_menus.scripts.manage_database"
+
+# Database utilities
+seed-fresh = "python -m pae_menus.scripts.manage_database seed --clear"
+db-status = "python -m pae_menus.scripts.manage_database status"
+db-backup = "python -m pae_menus.scripts.manage_database export --compact"

@@ -1,0 +1,1001 @@
+{
+  "export_info": {
+    "timestamp": "20250705_174614",
+    "exported_at": "2025-07-05T17:46:14.813321",
+    "version": "1.0",
+    "description": "PAE Menus database export"
+  },
+  "collections": {
+    "ingredients": [
+      {
+        "name": "Pollo",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Pollo fresco",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fdd",
+        "created_at": "2025-07-05 22:42:52.139000",
+        "updated_at": "2025-07-05 22:42:52.139000"
+      },
+      {
+        "name": "Carne de Res",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Carne de res fresca",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fde",
+        "created_at": "2025-07-05 22:42:52.186000",
+        "updated_at": "2025-07-05 22:42:52.186000"
+      },
+      {
+        "name": "Pescado",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Pescado fresco",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fdf",
+        "created_at": "2025-07-05 22:42:52.234000",
+        "updated_at": "2025-07-05 22:42:52.234000"
+      },
+      {
+        "name": "Huevos",
+        "base_unit_of_measure": "unidad",
+        "status": "active",
+        "description": "Huevos frescos",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fe0",
+        "created_at": "2025-07-05 22:42:52.272000",
+        "updated_at": "2025-07-05 22:42:52.272000"
+      },
+      {
+        "name": "Lentejas",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Lentejas secas",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fe1",
+        "created_at": "2025-07-05 22:42:52.296000",
+        "updated_at": "2025-07-05 22:42:52.296000"
+      },
+      {
+        "name": "Frijoles",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Frijoles secos",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fe2",
+        "created_at": "2025-07-05 22:42:52.315000",
+        "updated_at": "2025-07-05 22:42:52.315000"
+      },
+      {
+        "name": "Garbanzos",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Garbanzos secos",
+        "category": "Proteínas",
+        "_id": "6869aa6ce2bda9ee10050fe3",
+        "created_at": "2025-07-05 22:42:52.338000",
+        "updated_at": "2025-07-05 22:42:52.338000"
+      },
+      {
+        "name": "Arroz",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Arroz blanco",
+        "category": "Cereales",
+        "_id": "6869aa6ce2bda9ee10050fe4",
+        "created_at": "2025-07-05 22:42:52.365000",
+        "updated_at": "2025-07-05 22:42:52.365000"
+      },
+      {
+        "name": "Pasta",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Pasta italiana",
+        "category": "Cereales",
+        "_id": "6869aa6ce2bda9ee10050fe5",
+        "created_at": "2025-07-05 22:42:52.389000",
+        "updated_at": "2025-07-05 22:42:52.389000"
+      },
+      {
+        "name": "Pan",
+        "base_unit_of_measure": "unidad",
+        "status": "active",
+        "description": "Pan fresco",
+        "category": "Cereales",
+        "_id": "6869aa6ce2bda9ee10050fe6",
+        "created_at": "2025-07-05 22:42:52.411000",
+        "updated_at": "2025-07-05 22:42:52.411000"
+      },
+      {
+        "name": "Quinoa",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Quinoa",
+        "category": "Cereales",
+        "_id": "6869aa6ce2bda9ee10050fe7",
+        "created_at": "2025-07-05 22:42:52.453000",
+        "updated_at": "2025-07-05 22:42:52.453000"
+      },
+      {
+        "name": "Avena",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Avena en hojuelas",
+        "category": "Cereales",
+        "_id": "6869aa6ce2bda9ee10050fe8",
+        "created_at": "2025-07-05 22:42:52.518000",
+        "updated_at": "2025-07-05 22:42:52.518000"
+      },
+      {
+        "name": "Tomate",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Tomate fresco",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fe9",
+        "created_at": "2025-07-05 22:42:52.581000",
+        "updated_at": "2025-07-05 22:42:52.581000"
+      },
+      {
+        "name": "Cebolla",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Cebolla blanca",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fea",
+        "created_at": "2025-07-05 22:42:52.631000",
+        "updated_at": "2025-07-05 22:42:52.634000"
+      },
+      {
+        "name": "Zanahoria",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Zanahoria fresca",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050feb",
+        "created_at": "2025-07-05 22:42:52.681000",
+        "updated_at": "2025-07-05 22:42:52.681000"
+      },
+      {
+        "name": "Lechuga",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Lechuga fresca",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fec",
+        "created_at": "2025-07-05 22:42:52.723000",
+        "updated_at": "2025-07-05 22:42:52.723000"
+      },
+      {
+        "name": "Brócoli",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Brócoli fresco",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fed",
+        "created_at": "2025-07-05 22:42:52.781000",
+        "updated_at": "2025-07-05 22:42:52.781000"
+      },
+      {
+        "name": "Espinaca",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Espinaca fresca",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fee",
+        "created_at": "2025-07-05 22:42:52.842000",
+        "updated_at": "2025-07-05 22:42:52.842000"
+      },
+      {
+        "name": "Pepino",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Pepino fresco",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050fef",
+        "created_at": "2025-07-05 22:42:52.893000",
+        "updated_at": "2025-07-05 22:42:52.893000"
+      },
+      {
+        "name": "Pimentón",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Pimentón rojo",
+        "category": "Verduras",
+        "_id": "6869aa6ce2bda9ee10050ff0",
+        "created_at": "2025-07-05 22:42:52.917000",
+        "updated_at": "2025-07-05 22:42:52.917000"
+      },
+      {
+        "name": "Manzana",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Manzana fresca",
+        "category": "Frutas",
+        "_id": "6869aa6ce2bda9ee10050ff1",
+        "created_at": "2025-07-05 22:42:52.946000",
+        "updated_at": "2025-07-05 22:42:52.946000"
+      },
+      {
+        "name": "Banano",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Banano maduro",
+        "category": "Frutas",
+        "_id": "6869aa6ce2bda9ee10050ff2",
+        "created_at": "2025-07-05 22:42:52.974000",
+        "updated_at": "2025-07-05 22:42:52.974000"
+      },
+      {
+        "name": "Naranja",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Naranja fresca",
+        "category": "Frutas",
+        "_id": "6869aa6de2bda9ee10050ff3",
+        "created_at": "2025-07-05 22:42:53.007000",
+        "updated_at": "2025-07-05 22:42:53.007000"
+      },
+      {
+        "name": "Papaya",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Papaya fresca",
+        "category": "Frutas",
+        "_id": "6869aa6de2bda9ee10050ff4",
+        "created_at": "2025-07-05 22:42:53.049000",
+        "updated_at": "2025-07-05 22:42:53.049000"
+      },
+      {
+        "name": "Piña",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Piña fresca",
+        "category": "Frutas",
+        "_id": "6869aa6de2bda9ee10050ff5",
+        "created_at": "2025-07-05 22:42:53.089000",
+        "updated_at": "2025-07-05 22:42:53.089000"
+      },
+      {
+        "name": "Mango",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Mango maduro",
+        "category": "Frutas",
+        "_id": "6869aa6de2bda9ee10050ff6",
+        "created_at": "2025-07-05 22:42:53.122000",
+        "updated_at": "2025-07-05 22:42:53.122000"
+      },
+      {
+        "name": "Leche",
+        "base_unit_of_measure": "L",
+        "status": "active",
+        "description": "Leche fresca",
+        "category": "Lácteos",
+        "_id": "6869aa6de2bda9ee10050ff7",
+        "created_at": "2025-07-05 22:42:53.156000",
+        "updated_at": "2025-07-05 22:42:53.156000"
+      },
+      {
+        "name": "Queso",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Queso fresco",
+        "category": "Lácteos",
+        "_id": "6869aa6de2bda9ee10050ff8",
+        "created_at": "2025-07-05 22:42:53.188000",
+        "updated_at": "2025-07-05 22:42:53.188000"
+      },
+      {
+        "name": "Yogur",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Yogur natural",
+        "category": "Lácteos",
+        "_id": "6869aa6de2bda9ee10050ff9",
+        "created_at": "2025-07-05 22:42:53.215000",
+        "updated_at": "2025-07-05 22:42:53.215000"
+      },
+      {
+        "name": "Sal",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Sal marina",
+        "category": "Condimentos",
+        "_id": "6869aa6de2bda9ee10050ffa",
+        "created_at": "2025-07-05 22:42:53.255000",
+        "updated_at": "2025-07-05 22:42:53.255000"
+      },
+      {
+        "name": "Aceite",
+        "base_unit_of_measure": "L",
+        "status": "active",
+        "description": "Aceite vegetal",
+        "category": "Condimentos",
+        "_id": "6869aa6de2bda9ee10050ffb",
+        "created_at": "2025-07-05 22:42:53.286000",
+        "updated_at": "2025-07-05 22:42:53.286000"
+      },
+      {
+        "name": "Ajo",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Ajo fresco",
+        "category": "Condimentos",
+        "_id": "6869aa6de2bda9ee10050ffc",
+        "created_at": "2025-07-05 22:42:53.327000",
+        "updated_at": "2025-07-05 22:42:53.327000"
+      },
+      {
+        "name": "Cilantro",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Cilantro fresco",
+        "category": "Condimentos",
+        "_id": "6869aa6de2bda9ee10050ffd",
+        "created_at": "2025-07-05 22:42:53.355000",
+        "updated_at": "2025-07-05 22:42:53.355000"
+      },
+      {
+        "name": "Perejil",
+        "base_unit_of_measure": "kg",
+        "status": "active",
+        "description": "Perejil fresco",
+        "category": "Condimentos",
+        "_id": "6869aa6de2bda9ee10050ffe",
+        "created_at": "2025-07-05 22:42:53.383000",
+        "updated_at": "2025-07-05 22:42:53.383000"
+      }
+    ],
+    "dishes": [
+      {
+        "name": "Huevos Revueltos",
+        "description": "Huevos revueltos con verduras",
+        "status": "active",
+        "compatible_meal_types": [
+          "desayuno"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe0",
+              "quantity": 2.0,
+              "unit": "unidad"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fea",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe9",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffb",
+              "quantity": 0.02,
+              "unit": "L"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 250.0,
+          "protein": 18.0,
+          "carbohydrates": 5.0,
+          "fat": 18.0,
+          "fiber": 2.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "protein",
+        "_id": "6869aa6de2bda9ee10050fff",
+        "created_at": "2025-07-05 22:42:53.424000",
+        "updated_at": "2025-07-05 22:42:53.424000"
+      },
+      {
+        "name": "Avena con Frutas",
+        "description": "Avena preparada con frutas frescas",
+        "status": "active",
+        "compatible_meal_types": [
+          "desayuno"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe8",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ff7",
+              "quantity": 0.3,
+              "unit": "L"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050ff2",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050ff1",
+              "quantity": 0.1,
+              "unit": "kg"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 320.0,
+          "protein": 12.0,
+          "carbohydrates": 55.0,
+          "fat": 8.0,
+          "fiber": 8.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "cereal",
+        "_id": "6869aa6de2bda9ee10051000",
+        "created_at": "2025-07-05 22:42:53.468000",
+        "updated_at": "2025-07-05 22:42:53.468000"
+      },
+      {
+        "name": "Pollo a la Plancha",
+        "description": "Pollo a la plancha con vegetales",
+        "status": "active",
+        "compatible_meal_types": [
+          "almuerzo"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fdd",
+              "quantity": 0.15,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffc",
+              "quantity": 0.01,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffa",
+              "quantity": 0.005,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffb",
+              "quantity": 0.02,
+              "unit": "L"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 280.0,
+          "protein": 35.0,
+          "carbohydrates": 2.0,
+          "fat": 14.0,
+          "fiber": 0.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "protein",
+        "_id": "6869aa6de2bda9ee10051001",
+        "created_at": "2025-07-05 22:42:53.519000",
+        "updated_at": "2025-07-05 22:42:53.519000"
+      },
+      {
+        "name": "Arroz con Verduras",
+        "description": "Arroz preparado con verduras mixtas",
+        "status": "active",
+        "compatible_meal_types": [
+          "almuerzo"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe4",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050feb",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fed",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fea",
+              "quantity": 0.03,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffb",
+              "quantity": 0.02,
+              "unit": "L"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 220.0,
+          "protein": 5.0,
+          "carbohydrates": 45.0,
+          "fat": 4.0,
+          "fiber": 3.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "cereal",
+        "_id": "6869aa6de2bda9ee10051002",
+        "created_at": "2025-07-05 22:42:53.552000",
+        "updated_at": "2025-07-05 22:42:53.552000"
+      },
+      {
+        "name": "Lentejas Guisadas",
+        "description": "Lentejas guisadas con verduras",
+        "status": "active",
+        "compatible_meal_types": [
+          "almuerzo"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe1",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe9",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fea",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050feb",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffc",
+              "quantity": 0.01,
+              "unit": "kg"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 180.0,
+          "protein": 12.0,
+          "carbohydrates": 30.0,
+          "fat": 2.0,
+          "fiber": 10.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "protein",
+        "_id": "6869aa6de2bda9ee10051003",
+        "created_at": "2025-07-05 22:42:53.598000",
+        "updated_at": "2025-07-05 22:42:53.598000"
+      },
+      {
+        "name": "Ensalada Mixta",
+        "description": "Ensalada fresca con vegetales variados",
+        "status": "active",
+        "compatible_meal_types": [
+          "almuerzo"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fec",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe9",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fef",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050feb",
+              "quantity": 0.05,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ffb",
+              "quantity": 0.01,
+              "unit": "L"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 45.0,
+          "protein": 2.0,
+          "carbohydrates": 8.0,
+          "fat": 1.0,
+          "fiber": 4.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "vegetable",
+        "_id": "6869aa6de2bda9ee10051004",
+        "created_at": "2025-07-05 22:42:53.631000",
+        "updated_at": "2025-07-05 22:42:53.631000"
+      },
+      {
+        "name": "Fruta Picada",
+        "description": "Mezcla de frutas frescas picadas",
+        "status": "active",
+        "compatible_meal_types": [
+          "refrigerio"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050ff1",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050ff2",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ff4",
+              "quantity": 0.1,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ff5",
+              "quantity": 0.1,
+              "unit": "kg"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 85.0,
+          "protein": 1.0,
+          "carbohydrates": 22.0,
+          "fat": 0.0,
+          "fiber": 4.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "fruit",
+        "_id": "6869aa6de2bda9ee10051005",
+        "created_at": "2025-07-05 22:42:53.659000",
+        "updated_at": "2025-07-05 22:42:53.660000"
+      },
+      {
+        "name": "Yogur con Cereales",
+        "description": "Yogur natural con cereales",
+        "status": "active",
+        "compatible_meal_types": [
+          "refrigerio"
+        ],
+        "recipe": {
+          "ingredients": [
+            {
+              "ingredient_id": "6869aa6de2bda9ee10050ff9",
+              "quantity": 0.15,
+              "unit": "kg"
+            },
+            {
+              "ingredient_id": "6869aa6ce2bda9ee10050fe8",
+              "quantity": 0.02,
+              "unit": "kg"
+            }
+          ]
+        },
+        "nutritional_info": {
+          "calories": 150.0,
+          "protein": 8.0,
+          "carbohydrates": 22.0,
+          "fat": 4.0,
+          "fiber": 2.0,
+          "sodium": null,
+          "calcium": null,
+          "iron": null,
+          "vitamin_c": null,
+          "vitamin_a": null,
+          "photo_url": null
+        },
+        "dish_type": "dairy",
+        "_id": "6869aa6de2bda9ee10051006",
+        "created_at": "2025-07-05 22:42:53.700000",
+        "updated_at": "2025-07-05 22:42:53.700000"
+      }
+    ],
+    "menu_cycles": [
+      {
+        "name": "Ciclo Semanal Universidad",
+        "description": "Ciclo de menús semanal para restaurantes universitarios",
+        "status": "active",
+        "duration_days": 7,
+        "daily_menus": [
+          {
+            "day": 1,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051002",
+              "6869aa6de2bda9ee10051003"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          },
+          {
+            "day": 2,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10050fff"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051003",
+              "6869aa6de2bda9ee10051004"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051005"
+            ]
+          },
+          {
+            "day": 3,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051004",
+              "6869aa6de2bda9ee10051001"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          },
+          {
+            "day": 4,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10050fff"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051001",
+              "6869aa6de2bda9ee10051002"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051005"
+            ]
+          },
+          {
+            "day": 5,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051002",
+              "6869aa6de2bda9ee10051003"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          },
+          {
+            "day": 6,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10050fff"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051003",
+              "6869aa6de2bda9ee10051004"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051005"
+            ]
+          },
+          {
+            "day": 7,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051004",
+              "6869aa6de2bda9ee10051001"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          }
+        ],
+        "_id": "6869aa6de2bda9ee10051007",
+        "created_at": "2025-07-05 22:42:53.727000",
+        "updated_at": "2025-07-05 22:42:53.727000"
+      },
+      {
+        "name": "Ciclo Especial Estudiantes",
+        "description": "Ciclo de menús especial enfocado en estudiantes",
+        "status": "active",
+        "duration_days": 5,
+        "daily_menus": [
+          {
+            "day": 1,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051002",
+              "6869aa6de2bda9ee10051003"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          },
+          {
+            "day": 2,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10050fff"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051003",
+              "6869aa6de2bda9ee10051004"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051005"
+            ]
+          },
+          {
+            "day": 3,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051004",
+              "6869aa6de2bda9ee10051001"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          },
+          {
+            "day": 4,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10050fff"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051001",
+              "6869aa6de2bda9ee10051002"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051005"
+            ]
+          },
+          {
+            "day": 5,
+            "breakfast_dish_ids": [
+              "6869aa6de2bda9ee10051000"
+            ],
+            "lunch_dish_ids": [
+              "6869aa6de2bda9ee10051002",
+              "6869aa6de2bda9ee10051003"
+            ],
+            "snack_dish_ids": [
+              "6869aa6de2bda9ee10051006"
+            ]
+          }
+        ],
+        "_id": "6869aa6de2bda9ee10051008",
+        "created_at": "2025-07-05 22:42:53.771000",
+        "updated_at": "2025-07-05 22:42:53.771000"
+      }
+    ],
+    "menu_schedules": [
+      {
+        "menu_cycle_id": "6869aa6de2bda9ee10051007",
+        "coverage": [
+          {
+            "location_id": "campus_001",
+            "location_type": "campus",
+            "location_name": "Campus Principal"
+          },
+          {
+            "location_id": "campus_002",
+            "location_type": "campus",
+            "location_name": "Campus Norte"
+          }
+        ],
+        "start_date": "2025-07-06",
+        "end_date": "2025-07-19",
+        "status": "future",
+        "cancellation_info": null,
+        "_id": "6869aa6de2bda9ee10051009",
+        "created_at": "2025-07-05 22:42:53.821000",
+        "updated_at": "2025-07-05 22:42:53.821000"
+      },
+      {
+        "menu_cycle_id": "6869aa6de2bda9ee10051008",
+        "coverage": [
+          {
+            "location_id": "town_001",
+            "location_type": "town",
+            "location_name": "Medellín Centro"
+          },
+          {
+            "location_id": "town_002",
+            "location_type": "town",
+            "location_name": "Bogotá Chapinero"
+          }
+        ],
+        "start_date": "2025-07-20",
+        "end_date": "2025-07-30",
+        "status": "future",
+        "cancellation_info": null,
+        "_id": "6869aa6de2bda9ee1005100a",
+        "created_at": "2025-07-05 22:42:53.846000",
+        "updated_at": "2025-07-05 22:42:53.846000"
+      },
+      {
+        "menu_cycle_id": "6869aa6de2bda9ee10051007",
+        "coverage": [
+          {
+            "location_id": "campus_001",
+            "location_type": "campus",
+            "location_name": "Campus Principal"
+          }
+        ],
+        "start_date": "2025-06-21",
+        "end_date": "2025-07-04",
+        "status": "completed",
+        "cancellation_info": null,
+        "_id": "6869aa6de2bda9ee1005100b",
+        "created_at": "2025-07-05 22:42:53.876000",
+        "updated_at": "2025-07-05 22:42:53.876000"
+      }
+    ]
+  },
+  "counts": {
+    "ingredients": 34,
+    "dishes": 8,
+    "menu_cycles": 2,
+    "menu_schedules": 3,
+    "total": 47
+  }
+}
