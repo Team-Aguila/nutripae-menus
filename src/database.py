@@ -4,8 +4,8 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from beanie import init_beanie
 from pymongo.errors import ServerSelectionTimeoutError, ConfigurationError
 
-from pae_menus.core.config import settings
-from pae_menus.models import Ingredient, Dish, MenuCycle, MenuSchedule
+from core.config import settings
+from models import Ingredient, Dish, MenuCycle, MenuSchedule
 
 # Setup logging
 logger = logging.getLogger(__name__)

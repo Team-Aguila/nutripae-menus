@@ -4,7 +4,7 @@ from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
-from pae_menus.models.ingredient import (
+from models.ingredient import (
     Ingredient, 
     IngredientCreate, 
     IngredientUpdate, 
@@ -13,8 +13,8 @@ from pae_menus.models.ingredient import (
     MenuUsageInfo,
     IngredientStatus
 )
-from pae_menus.models.dish import Dish
-from pae_menus.models.menu_cycle import MenuCycle
+from models.dish import Dish
+from models.menu_cycle import MenuCycle
 
 
 class IngredientService:

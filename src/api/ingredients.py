@@ -1,17 +1,17 @@
 # pae_menus/api/ingredients.py
 from typing import List, Optional
-from fastapi import APIRouter, Query, HTTPException, status
+from fastapi import APIRouter, Query, HTTPException, status, Depends
 from fastapi.responses import JSONResponse, Response
 
-from pae_menus.models.ingredient import (
+from models.ingredient import (
     IngredientCreate, 
     IngredientUpdate, 
     IngredientResponse,
     IngredientDetailedResponse,
     IngredientStatus
 )
-from pae_menus.services.ingredient_service import IngredientService
-
+from services.ingredient_service import IngredientService
+from core.dependencies import require_create, require_list, require_update, require_delete, require_read  
 router = APIRouter()
 
 
@@ -22,7 +22,10 @@ router = APIRouter()
     summary="Create a new ingredient",
     description="Create a new ingredient with name uniqueness validation. Returns the created ingredient with generated ID."
 )
-async def create_ingredient(ingredient_data: IngredientCreate) -> IngredientResponse:
+async def create_ingredient(
+    ingredient_data: IngredientCreate,
+    current_user: dict = Depends(require_create()),
+) -> IngredientResponse:
     """
     Create a new ingredient.
     
@@ -40,9 +43,10 @@ async def create_ingredient(ingredient_data: IngredientCreate) -> IngredientResp
     "/",
     response_model=List[IngredientResponse],
     summary="Get all ingredients",
-    description="Retrieve all ingredients with optional filtering and pagination. Use '/active' endpoint for menu creation to exclude inactive ingredients."
+    description="Retrieve all ingredients with optional filtering and pagination. Use '/active' endpoint for menu creation to exclude inactive ingredients.",
 )
 async def get_ingredients(
+    current_user: dict = Depends(require_list()),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     status: Optional[IngredientStatus] = Query(None, description="Filter by ingredient status"),
@@ -75,9 +79,10 @@ async def get_ingredients(
     "/active",
     response_model=List[IngredientResponse],
     summary="Get active ingredients for menu creation",
-    description="Retrieve only active ingredients available for creating new menus. Inactive ingredients are excluded."
+    description="Retrieve only active ingredients available for creating new menus. Inactive ingredients are excluded.",
 )
 async def get_active_ingredients(
+    current_user: dict = Depends(require_list()),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     category: Optional[str] = Query(None, description="Filter by ingredient category"),
@@ -107,9 +112,10 @@ async def get_active_ingredients(
     "/detailed",
     response_model=List[IngredientDetailedResponse],
     summary="Get detailed ingredients with menu usage",
-    description="Retrieve ingredients with comprehensive details including menu usage information. Perfect for nutritionist/administrator dashboard views."
+    description="Retrieve ingredients with comprehensive details including menu usage information. Perfect for nutritionist/administrator dashboard views.",
 )
 async def get_detailed_ingredients(
+    current_user: dict = Depends(require_list()),
     skip: int = Query(0, ge=0, description="Number of records to skip"),
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     status: Optional[IngredientStatus] = Query(None, description="Filter by ingredient status"),
@@ -147,9 +153,11 @@ async def get_detailed_ingredients(
     "/categories",
     response_model=List[str],
     summary="Get available ingredient categories",
-    description="Retrieve all available categories for filtering ingredients."
+    description="Retrieve all available categories for filtering ingredients.",
 )
-async def get_ingredient_categories() -> List[str]:
+async def get_ingredient_categories(
+    current_user: dict = Depends(require_list()),
+) -> List[str]:
     """
     Get all available ingredient categories for filtering purposes.
     
@@ -163,9 +171,11 @@ async def get_ingredient_categories() -> List[str]:
 @router.get(
     "/statistics",
     summary="Get ingredient statistics",
-    description="Get comprehensive statistics about ingredients for dashboard views."
+    description="Get comprehensive statistics about ingredients for dashboard views.",
 )
-async def get_ingredient_statistics() -> JSONResponse:
+async def get_ingredient_statistics(
+    current_user: dict = Depends(require_list()),
+) -> JSONResponse:
     """
     Get comprehensive ingredient statistics.
     
@@ -187,11 +197,12 @@ async def get_ingredient_statistics() -> JSONResponse:
 @router.head(
     "/validate/name-uniqueness",
     summary="Check name uniqueness",
-    description="Check if an ingredient name is unique using HTTP semantics. Returns 200 OK if unique, 409 Conflict if already exists."
+    description="Check if an ingredient name is unique using HTTP semantics. Returns 200 OK if unique, 409 Conflict if already exists.",
 )
 async def check_name_uniqueness(
     name: str = Query(..., description="The ingredient name to check"),
-    exclude_id: Optional[str] = Query(None, description="ID to exclude from uniqueness check (for updates)")
+    exclude_id: Optional[str] = Query(None, description="ID to exclude from uniqueness check (for updates)"),
+    current_user: dict = Depends(require_read()),
 ) -> Response:
     """
     Check if an ingredient name is unique using HTTP HEAD method.
@@ -224,9 +235,11 @@ async def check_name_uniqueness(
     "/{ingredient_id}",
     response_model=IngredientResponse,
     summary="Get ingredient by ID",
-    description="Retrieve a specific ingredient by its ID."
+    description="Retrieve a specific ingredient by its ID.",
 )
-async def get_ingredient(ingredient_id: str) -> IngredientResponse:
+async def get_ingredient(ingredient_id: str,
+    current_user: dict = Depends(require_read()),
+) -> IngredientResponse:
     """
     Get a specific ingredient by ID.
     
@@ -242,7 +255,9 @@ async def get_ingredient(ingredient_id: str) -> IngredientResponse:
     summary="Get detailed ingredient by ID with menu usage",
     description="Retrieve a specific ingredient with comprehensive details including menu usage information."
 )
-async def get_detailed_ingredient(ingredient_id: str) -> IngredientDetailedResponse:
+async def get_detailed_ingredient(ingredient_id: str,
+    current_user: dict = Depends(require_list()),
+) -> IngredientDetailedResponse:
     """
     Get a specific ingredient with detailed menu usage information.
     
@@ -266,7 +281,8 @@ async def get_detailed_ingredient(ingredient_id: str) -> IngredientDetailedRespo
 )
 async def update_ingredient(
     ingredient_id: str, 
-    ingredient_data: IngredientUpdate
+    ingredient_data: IngredientUpdate,
+    current_user: dict = Depends(require_update()),
 ) -> IngredientResponse:
     """
     Update an existing ingredient.
@@ -287,7 +303,9 @@ async def update_ingredient(
     summary="Delete an ingredient",
     description="Delete an ingredient by its ID."
 )
-async def delete_ingredient(ingredient_id: str) -> JSONResponse:
+async def delete_ingredient(ingredient_id: str,
+    current_user: dict = Depends(require_delete()),
+) -> JSONResponse:
     """
     Delete an ingredient.
     
@@ -304,9 +322,11 @@ async def delete_ingredient(ingredient_id: str) -> JSONResponse:
     "/{ingredient_id}/inactivate",
     response_model=IngredientResponse,
     summary="Inactivate an ingredient",
-    description="Mark an ingredient as inactive (soft delete). The ingredient will no longer be available for new menus but existing menu associations remain intact."
+    description="Mark an ingredient as inactive (soft delete). The ingredient will no longer be available for new menus but existing menu associations remain intact.",
 )
-async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
+async def inactivate_ingredient(ingredient_id: str,
+    current_user: dict = Depends(require_update()),
+) -> IngredientResponse:
     """
     Inactivate an ingredient (soft delete).
     
@@ -328,7 +348,9 @@ async def inactivate_ingredient(ingredient_id: str) -> IngredientResponse:
     summary="Activate an ingredient",
     description="Mark an inactive ingredient as active again, making it available for new menus."
 )
-async def activate_ingredient(ingredient_id: str) -> IngredientResponse:
+async def activate_ingredient(ingredient_id: str,
+    current_user: dict = Depends(require_update()),
+) -> IngredientResponse:
     """
     Activate an ingredient.
     

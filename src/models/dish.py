@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from enum import Enum
 from datetime import datetime
-from .commons import Recipe, MealType, NutritionalInfo
+from models.commons import Recipe, MealType, NutritionalInfo
 
 class DishStatus(str, Enum):
     """

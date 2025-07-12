@@ -2,9 +2,10 @@ from fastapi import APIRouter, HTTPException, Depends, status, Query
 from beanie import PydanticObjectId
 from typing import List, Optional
 
-from ..models.dish import Dish, DishCreate, DishUpdate, DishResponse, DishStatus
-from ..models.commons import MealType
-from ..services.dish_service import dish_service, DishService
+from models.dish import Dish, DishCreate, DishUpdate, DishResponse, DishStatus
+from models.commons import MealType
+from services.dish_service import dish_service, DishService
+from core.dependencies import require_list, require_read, require_update, require_create
 
 router = APIRouter(
     tags=["Dishes"],
@@ -17,6 +18,7 @@ async def get_all_dishes(
     status: Optional[DishStatus] = Query(None, description="Filter by dish status"),
     meal_type: Optional[MealType] = Query(None, description="Filter by compatible meal type"),
     service: DishService = Depends(lambda: dish_service),
+    current_user: dict = Depends(require_list()),
 ):
     """
     Retrieve a list of all dishes, with optional filters for name, status, and meal type.
@@ -27,6 +29,7 @@ async def get_all_dishes(
 async def get_dish(
     dish_id: PydanticObjectId,
     service: DishService = Depends(lambda: dish_service),
+    current_user: dict = Depends(require_read()),
 ):
     """
     Retrieve the details of a single dish by its unique ID.
@@ -45,6 +48,7 @@ async def get_dish(
 async def create_dish(
     dish_data: DishCreate,
     service: DishService = Depends(lambda: dish_service),
+    current_user: dict = Depends(require_create()),
 ):
     """
     Create a new dish with nutritional information and a recipe.
@@ -67,6 +71,7 @@ async def update_dish(
     dish_id: PydanticObjectId,
     dish_data: DishUpdate,
     service: DishService = Depends(lambda: dish_service),
+    current_user: dict = Depends(require_update()),
 ):
     """
     Update an existing dish's properties, including its recipe.

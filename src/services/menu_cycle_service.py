@@ -3,7 +3,7 @@ from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 from pymongo.errors import DuplicateKeyError
 
-from pae_menus.models.menu_cycle import (
+from models.menu_cycle import (
     MenuCycle,
     MenuCycleCreate,
     MenuCycleUpdate,
