@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status, Query
 from typing import List, Optional
 from datetime import date
 
-from ..models.menu_schedule import (
+from models.menu_schedule import (
     MenuScheduleAssignmentRequest,
     MenuScheduleAssignmentSummary,
     MenuScheduleResponse,
@@ -12,8 +12,9 @@ from ..models.menu_schedule import (
     LocationType,
     ScheduleDetailedResponse
 )
-from ..services.menu_schedule_service import menu_schedule_service, MenuScheduleService
-from ..services.coverage_service import coverage_service, CoverageService
+from services.menu_schedule_service import menu_schedule_service, MenuScheduleService
+from services.coverage_service import coverage_service, CoverageService
+from core.dependencies import require_create, require_list, require_update, require_delete, require_read
 
 router = APIRouter(
     tags=["Menu Schedules"],
@@ -29,7 +30,8 @@ router = APIRouter(
 )
 async def assign_menu_cycle(
     assignment_request: MenuScheduleAssignmentRequest,
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_create()),
 ) -> MenuScheduleAssignmentSummary:
     """
     Assign a menu cycle to locations for a date range.
@@ -68,7 +70,8 @@ async def get_all_schedules(
     start_date_to: Optional[date] = Query(None, description="Filter schedules starting up to this date"),
     end_date_from: Optional[date] = Query(None, description="Filter schedules ending from this date"),
     end_date_to: Optional[date] = Query(None, description="Filter schedules ending up to this date"),
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_list()),
 ) -> List[MenuScheduleResponse]:
     """
     Get all menu schedules with enhanced filtering for administrators.
@@ -111,7 +114,8 @@ async def get_all_schedules(
 )
 async def get_schedule(
     schedule_id: str,
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_read()),
 ) -> MenuScheduleResponse:
     """
     Get a specific menu schedule by ID.
@@ -134,7 +138,8 @@ async def get_schedule(
 )
 async def get_schedule_detailed(
     schedule_id: str,
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_read()),
 ) -> ScheduleDetailedResponse:
     """
     Get detailed schedule view with daily effective menus for administrators.
@@ -170,7 +175,8 @@ async def get_schedule_detailed(
 async def update_schedule(
     schedule_id: str,
     schedule_data: MenuScheduleUpdate,
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_update()),
 ) -> MenuScheduleResponse:
     """
     Update a menu schedule.
@@ -201,7 +207,8 @@ async def update_schedule(
 async def cancel_schedule(
     schedule_id: str,
     reason: Optional[str] = Query(None, description="Reason for cancellation"),
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_update()),
 ) -> MenuScheduleResponse:
     """
     Cancel a menu schedule.
@@ -225,7 +232,8 @@ async def cancel_schedule(
 async def uncancel_schedule(
     schedule_id: str,
     reason: Optional[str] = Query(None, description="Reason for uncancelling"),
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_update()),
 ) -> MenuScheduleResponse:
     """
     Uncancel a menu schedule.
@@ -257,7 +265,8 @@ async def get_citizen_menu(
     location_id: str = Query(..., description="Location ID (campus or town ID)"),
     location_type: LocationType = Query(..., description="Location type: 'campus' or 'town'"),
     date: date = Query(..., description="Date to get the menu for (YYYY-MM-DD format)"),
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_read()),
 ) -> CitizenMenuResponse:
     """
     Get the effective menu for a specific location and date.
@@ -297,7 +306,8 @@ async def get_citizen_menu(
 )
 async def delete_schedule(
     schedule_id: str,
-    service: MenuScheduleService = Depends(lambda: menu_schedule_service)
+    service: MenuScheduleService = Depends(lambda: menu_schedule_service),
+    current_user: dict = Depends(require_delete()),
 ) -> dict:
     """
     Delete a menu schedule.

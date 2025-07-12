@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException, Query, status
+from fastapi import APIRouter, HTTPException, Query, status, Depends
 from typing import Optional
 
-from ..models.nutritional_analysis import (
+from models.nutritional_analysis import (
     NutritionalAnalysisReport, SimplifiedNutritionalSummary, NutritionalComparisonReport
 )
-from ..services.nutritional_analysis_service import NutritionalAnalysisService
+from services.nutritional_analysis_service import NutritionalAnalysisService
+from core.dependencies import require_list, require_read, require_update, require_delete, require_create
 
 router = APIRouter(
     tags=["Nutritional Analysis"],
@@ -18,7 +19,10 @@ router = APIRouter(
     summary="Generate comprehensive nutritional analysis report",
     description="Generate a complete nutritional analysis report for a menu schedule, including food groups, nutrients, and recommendations."
 )
-async def generate_nutritional_report(schedule_id: str) -> NutritionalAnalysisReport:
+async def generate_nutritional_report(
+    schedule_id: str,
+    current_user: dict = Depends(require_create()),
+) -> NutritionalAnalysisReport:
     """
     Generate a comprehensive nutritional analysis report for a menu schedule.
     
@@ -42,7 +46,10 @@ async def generate_nutritional_report(schedule_id: str) -> NutritionalAnalysisRe
     summary="Get simplified nutritional summary",
     description="Get a simplified overview of nutritional content for quick assessment."
 )
-async def get_nutritional_summary(schedule_id: str) -> SimplifiedNutritionalSummary:
+async def get_nutritional_summary(
+    schedule_id: str,
+    current_user: dict = Depends(require_read()),
+) -> SimplifiedNutritionalSummary:
     """
     Get a simplified nutritional summary for quick overview.
     
@@ -70,7 +77,8 @@ async def compare_with_requirements(
     age_group: Optional[str] = Query(
         "school_age_6_12", 
         description="Age group for nutritional requirements (school_age_6_12 or school_age_13_18)"
-    )
+    ),
+    current_user: dict = Depends(require_read()),
 ) -> NutritionalComparisonReport:
     """
     Compare menu nutrition with standard nutritional requirements.
@@ -98,7 +106,10 @@ async def compare_with_requirements(
     summary="Get food group analysis",
     description="Get detailed food group analysis for a menu schedule."
 )
-async def get_food_group_analysis(schedule_id: str) -> dict:
+async def get_food_group_analysis(
+    schedule_id: str,
+    current_user: dict = Depends(require_read()),
+) -> dict:
     """
     Get detailed food group analysis for a menu schedule.
     
@@ -152,7 +163,10 @@ async def get_food_group_analysis(schedule_id: str) -> dict:
     summary="Get nutrient analysis",
     description="Get detailed nutrient analysis for a menu schedule."
 )
-async def get_nutrient_analysis(schedule_id: str) -> dict:
+async def get_nutrient_analysis(
+    schedule_id: str,
+    current_user: dict = Depends(require_read()),
+) -> dict:
     """
     Get detailed nutrient analysis for a menu schedule.
     
