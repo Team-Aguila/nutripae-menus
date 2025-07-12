@@ -3,7 +3,7 @@ from datetime import date, timedelta
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
-from pae_menus.models.menu_schedule import (
+from models.menu_schedule import (
     MenuSchedule,
     MenuScheduleCreate,
     MenuScheduleUpdate,
@@ -17,8 +17,8 @@ from pae_menus.models.menu_schedule import (
     CitizenMenuResponse,
     DishInMenu
 )
-from pae_menus.models.menu_cycle import MenuCycle, MenuCycleStatus
-from pae_menus.services.coverage_service import coverage_service, CoverageService
+from models.menu_cycle import MenuCycle, MenuCycleStatus
+from services.coverage_service import coverage_service, CoverageService
 
 class MenuScheduleService:
     """Service class for menu schedule management operations"""

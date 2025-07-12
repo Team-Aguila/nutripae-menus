@@ -1,8 +1,9 @@
 from fastapi import APIRouter, HTTPException, Depends, status, Query
 from typing import List, Optional
 
-from ..models.menu_cycle import MenuCycleCreate, MenuCycleUpdate, MenuCycleResponse, MenuCycleStatus
-from ..services.menu_cycle_service import menu_cycle_service, MenuCycleService
+from models.menu_cycle import MenuCycleCreate, MenuCycleUpdate, MenuCycleResponse, MenuCycleStatus
+from services.menu_cycle_service import menu_cycle_service, MenuCycleService
+from core.dependencies import require_create, require_list, require_update, require_delete, require_read
 
 router = APIRouter(
     tags=["Menu Cycles"],
@@ -18,7 +19,8 @@ router = APIRouter(
 )
 async def create_menu_cycle(
     menu_cycle_data: MenuCycleCreate,
-    service: MenuCycleService = Depends(lambda: menu_cycle_service)
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_create()),
 ) -> MenuCycleResponse:
     """
     Create a new menu cycle.
@@ -48,7 +50,8 @@ async def get_all_menu_cycles(
     limit: int = Query(100, ge=1, le=1000, description="Maximum number of records to return"),
     status: Optional[MenuCycleStatus] = Query(None, description="Filter by menu cycle status"),
     search: Optional[str] = Query(None, description="Search term for menu cycle name"),
-    service: MenuCycleService = Depends(lambda: menu_cycle_service)
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_list()),
 ) -> List[MenuCycleResponse]:
     """
     Get all menu cycles with optional filtering.
@@ -78,7 +81,8 @@ async def get_all_menu_cycles(
 )
 async def get_menu_cycle(
     menu_cycle_id: str,
-    service: MenuCycleService = Depends(lambda: menu_cycle_service)
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_read()),
 ) -> MenuCycleResponse:
     """
     Get a specific menu cycle by ID.
@@ -101,7 +105,8 @@ async def get_menu_cycle(
 async def update_menu_cycle(
     menu_cycle_id: str,
     menu_cycle_data: MenuCycleUpdate,
-    service: MenuCycleService = Depends(lambda: menu_cycle_service)
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_update()),
 ) -> MenuCycleResponse:
     """
     Update a menu cycle.
@@ -129,7 +134,8 @@ async def update_menu_cycle(
 )
 async def deactivate_menu_cycle(
     menu_cycle_id: str,
-    service: MenuCycleService = Depends(lambda: menu_cycle_service)
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_delete()),
 ) -> MenuCycleResponse:
     """
     Deactivate a menu cycle.

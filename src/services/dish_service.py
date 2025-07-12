@@ -1,8 +1,8 @@
 from beanie import PydanticObjectId, Document
 from typing import List, Optional
-from ..models.dish import Dish, DishCreate, DishUpdate, DishStatus
-from ..models.ingredient import Ingredient, IngredientStatus
-from ..models.commons import Recipe, MealType
+from models.dish import Dish, DishCreate, DishUpdate, DishStatus
+from models.ingredient import Ingredient, IngredientStatus
+from models.commons import Recipe, MealType
 
 class DishService:
     async def create_dish(self, dish_data: DishCreate) -> Dish:

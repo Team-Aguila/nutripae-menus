@@ -3,15 +3,15 @@ from datetime import date as Date, timedelta
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 
-from ..models.nutritional_analysis import (
+from models.nutritional_analysis import (
     FoodGroup, FoodGroupPortion, NutrientSummary, DailyNutritionalAnalysis,
     NutritionalAnalysisReport, SimplifiedNutritionalSummary,
     NutritionalRequirements, NutritionalComparisonReport
 )
-from ..models.menu_schedule import MenuSchedule, MenuScheduleStatus
-from ..models.menu_cycle import MenuCycle
-from ..models.dish import Dish, DishType
-from ..models.ingredient import Ingredient
+from models.menu_schedule import MenuSchedule, MenuScheduleStatus
+from models.menu_cycle import MenuCycle
+from models.dish import Dish, DishType
+from models.ingredient import Ingredient
 
 
 class NutritionalAnalysisService:

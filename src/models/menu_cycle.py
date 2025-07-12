@@ -3,7 +3,7 @@ from pydantic import BaseModel, Field, field_validator
 from typing import Optional, List
 from enum import Enum
 from datetime import datetime
-from .commons import DailyMenu
+from models.commons import DailyMenu
 
 class MenuCycleStatus(str, Enum):
     ACTIVE = "active"
