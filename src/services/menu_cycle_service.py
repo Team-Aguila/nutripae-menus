@@ -2,6 +2,7 @@ from typing import List, Optional
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 from pymongo.errors import DuplicateKeyError
+from pydantic import ValidationError
 
 from models.menu_cycle import (
     MenuCycle,
@@ -29,6 +30,14 @@ class MenuCycleService:
             HTTPException: If name already exists or creation fails
         """
         try:
+            # Check if menu cycle with same name already exists
+            existing = await MenuCycle.find_one({"name": {"$regex": f"^{menu_cycle_data.name}$", "$options": "i"}})
+            if existing:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Menu cycle with name '{menu_cycle_data.name}' already exists"
+                )
+
             # Validate that all days have at least one dish per meal type
             for daily_menu in menu_cycle_data.daily_menus:
                 if not daily_menu.breakfast_dish_ids and not daily_menu.lunch_dish_ids and not daily_menu.snack_dish_ids:
@@ -50,7 +59,18 @@ class MenuCycleService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Menu cycle with name '{menu_cycle_data.name}' already exists"
             )
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Validation error: {str(e)}"
+            )
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Validation error: {str(e)}"
+            )
         except HTTPException:
+            # Re-raise HTTPExceptions without wrapping them
             raise
         except Exception as e:
             raise HTTPException(
@@ -87,7 +107,7 @@ class MenuCycleService:
             
         except ValueError:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Invalid menu cycle ID format"
             )
         except HTTPException:
@@ -172,6 +192,15 @@ class MenuCycleService:
                     detail=f"Menu cycle with id '{menu_cycle_id}' not found"
                 )
 
+            # Check for duplicate name if name is being updated
+            if menu_cycle_data.name and menu_cycle_data.name != menu_cycle.name:
+                existing_cycle = await MenuCycle.find_one({"name": menu_cycle_data.name, "_id": {"$ne": menu_cycle.id}})
+                if existing_cycle:
+                    raise HTTPException(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        detail=f"Menu cycle with name '{menu_cycle_data.name}' already exists"
+                    )
+
             # If updating daily menus, validate that all days have at least one dish
             if menu_cycle_data.daily_menus:
                 for daily_menu in menu_cycle_data.daily_menus:
@@ -227,7 +256,7 @@ class MenuCycleService:
                 )
 
             # Check if menu cycle is assigned to any active or future schedules
-            from pae_menus.models.menu_schedule import MenuSchedule, MenuScheduleStatus
+            from models.menu_schedule import MenuSchedule, MenuScheduleStatus
             active_schedules = await MenuSchedule.find({
                 "menu_cycle_id": menu_cycle.id,
                 "status": {"$in": [MenuScheduleStatus.ACTIVE, MenuScheduleStatus.FUTURE]}
@@ -259,6 +288,56 @@ class MenuCycleService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail=f"Error deactivating menu cycle: {str(e)}"
+            )
+
+    @staticmethod
+    async def delete_menu_cycle(menu_cycle_id: str) -> dict:
+        """
+        Delete a menu cycle
+        
+        Args:
+            menu_cycle_id: The menu cycle ID
+            
+        Returns:
+            dict: Confirmation message
+            
+        Raises:
+            HTTPException: If menu cycle not found or deletion fails
+        """
+        try:
+            menu_cycle = await MenuCycle.get(PydanticObjectId(menu_cycle_id))
+            if not menu_cycle:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND,
+                    detail=f"Menu cycle with id '{menu_cycle_id}' not found"
+                )
+
+            # Check if menu cycle is assigned to any schedules
+            from models.menu_schedule import MenuSchedule
+            active_schedules = await MenuSchedule.find({
+                "menu_cycle_id": menu_cycle.id
+            }).to_list()
+
+            if active_schedules:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Cannot delete menu cycle that is assigned to schedules"
+                )
+
+            await menu_cycle.delete()
+            return {"message": f"Menu cycle '{menu_cycle.name}' deleted successfully"}
+            
+        except ValueError:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid menu cycle ID format"
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error deleting menu cycle: {str(e)}"
             )
 
 # Create a singleton instance
