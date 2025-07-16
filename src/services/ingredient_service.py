@@ -3,6 +3,7 @@ from typing import List, Optional
 from beanie import PydanticObjectId
 from fastapi import HTTPException, status
 from pymongo.errors import DuplicateKeyError
+from pydantic import ValidationError
 
 from models.ingredient import (
     Ingredient, 
@@ -47,9 +48,17 @@ class IngredientService:
             ingredient = Ingredient(**ingredient_data.model_dump())
             await ingredient.insert()
             
+            # Refresh from database to ensure consistency
+            created_ingredient = await Ingredient.get(ingredient.id)
+            if not created_ingredient:
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    detail="Failed to create ingredient - database consistency error"
+                )
+            
             return IngredientResponse(
-                id=str(ingredient.id),
-                **ingredient.model_dump(exclude={"id"})
+                id=str(created_ingredient.id),
+                **created_ingredient.model_dump(exclude={"id"})
             )
             
         except DuplicateKeyError:
@@ -57,6 +66,19 @@ class IngredientService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail=f"Ingredient with name '{ingredient_data.name}' already exists"
             )
+        except ValidationError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Validation error: {str(e)}"
+            )
+        except ValueError as e:
+            raise HTTPException(
+                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+                detail=f"Validation error: {str(e)}"
+            )
+        except HTTPException:
+            # Re-raise HTTPExceptions without wrapping them
+            raise
         except Exception as e:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
@@ -238,7 +260,7 @@ class IngredientService:
             dict: Confirmation message
             
         Raises:
-            HTTPException: If ingredient not found
+            HTTPException: If ingredient not found or is used in dishes
         """
         try:
             ingredient = await Ingredient.get(PydanticObjectId(ingredient_id))
@@ -246,6 +268,18 @@ class IngredientService:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
                     detail=f"Ingredient with id '{ingredient_id}' not found"
+                )
+            
+            # Check if ingredient is used in any dishes
+            dishes_using_ingredient = await Dish.find({
+                "recipe.ingredients.ingredient_id": ingredient.id
+            }).to_list()
+            
+            if dishes_using_ingredient:
+                dish_names = [dish.name for dish in dishes_using_ingredient]
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail=f"Cannot delete ingredient '{ingredient.name}' because it is used in dishes: {', '.join(dish_names)}"
                 )
             
             await ingredient.delete()

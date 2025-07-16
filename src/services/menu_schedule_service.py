@@ -272,8 +272,8 @@ class MenuScheduleService:
 
     async def get_schedule_detailed_view(self, schedule_id: str) -> "ScheduleDetailedResponse":
         """Get detailed schedule view with daily effective menus for administrators"""
-        from pae_menus.models.menu_schedule import ScheduleDetailedResponse, DailyMenuByLocation
-        from pae_menus.models.menu_cycle import MenuCycle
+        from models.menu_schedule import ScheduleDetailedResponse, DailyMenuByLocation
+        from models.menu_cycle import MenuCycle
         from datetime import timedelta
         
         try:
@@ -302,39 +302,42 @@ class MenuScheduleService:
             
             # Generate daily menus for each location and date
             daily_menus = []
-            for location_coverage in schedule.coverage:
+            
+            for coverage in schedule.coverage:
                 for schedule_date in schedule_dates:
-                    # Calculate which day of the cycle this date corresponds to
+                    # Calculate which day of the cycle corresponds to this date
                     days_since_start = (schedule_date - schedule.start_date).days
                     cycle_day = (days_since_start % menu_cycle.duration_days) + 1
                     
-                    # Find the daily menu for this cycle day
-                    daily_menu = None
+                    # Find the daily menu for this day
+                    daily_menu_data = None
                     for dm in menu_cycle.daily_menus:
                         if dm.day == cycle_day:
-                            daily_menu = dm
+                            daily_menu_data = dm
                             break
                     
-                    if daily_menu:
-                        # Get dish details for each meal type
-                        breakfast_dishes = await self._get_dish_details(daily_menu.breakfast_dish_ids)
-                        lunch_dishes = await self._get_dish_details(daily_menu.lunch_dish_ids)
-                        snack_dishes = await self._get_dish_details(daily_menu.snack_dish_ids)
-                        
-                        daily_menus.append(DailyMenuByLocation(
-                            location_id=location_coverage.location_id,
-                            location_name=location_coverage.location_name,
-                            location_type=location_coverage.location_type.value,
-                            menu_date=schedule_date,
-                            cycle_day=cycle_day,
-                            breakfast=breakfast_dishes,
-                            lunch=lunch_dishes,
-                            snack=snack_dishes
-                        ))
-            
-            # Calculate totals
-            total_days = len(schedule_dates)
-            total_locations = len(schedule.coverage)
+                    # Get dish details for each meal type
+                    breakfast_dishes = []
+                    lunch_dishes = []
+                    snack_dishes = []
+                    
+                    if daily_menu_data:
+                        breakfast_dishes = await self._get_dish_details_simple(daily_menu_data.breakfast_dish_ids)
+                        lunch_dishes = await self._get_dish_details_simple(daily_menu_data.lunch_dish_ids)
+                        snack_dishes = await self._get_dish_details_simple(daily_menu_data.snack_dish_ids)
+                    
+                    daily_menu = DailyMenuByLocation(
+                        date=schedule_date,
+                        location_id=coverage.location_id,
+                        location_name=coverage.location_name,
+                        location_type=coverage.location_type,
+                        cycle_day=cycle_day,
+                        breakfast_dishes=breakfast_dishes,
+                        lunch_dishes=lunch_dishes,
+                        snack_dishes=snack_dishes
+                    )
+                    
+                    daily_menus.append(daily_menu)
             
             return ScheduleDetailedResponse(
                 id=str(schedule.id),
@@ -344,18 +347,22 @@ class MenuScheduleService:
                 start_date=schedule.start_date,
                 end_date=schedule.end_date,
                 status=schedule.status,
-                cancellation_info=schedule.cancellation_info,
-                created_at=schedule.created_at,
-                updated_at=schedule.updated_at,
                 daily_menus=daily_menus,
-                total_days=total_days,
-                total_locations=total_locations
+                created_at=schedule.created_at,
+                updated_at=schedule.updated_at
             )
             
         except ValueError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Invalid schedule ID format"
+            )
+        except HTTPException:
+            raise
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail=f"Error retrieving schedule details: {str(e)}"
             )
 
     async def update_schedule(
@@ -476,7 +483,7 @@ class MenuScheduleService:
                     detail="Cannot cancel completed schedule"
                 )
 
-            from pae_menus.models.menu_schedule import CancellationInfo
+            from models.menu_schedule import CancellationInfo
             schedule.status = MenuScheduleStatus.CANCELLED
             schedule.cancellation_info = CancellationInfo(reason=reason)
             schedule.update_timestamp()
@@ -615,8 +622,8 @@ class MenuScheduleService:
         Returns:
             CitizenMenuResponse: The effective menu for the date and location
         """
-        from pae_menus.models.menu_cycle import MenuCycle
-        from pae_menus.models.dish import Dish
+        from models.menu_cycle import MenuCycle
+        from models.dish import Dish
         
         try:
             # 1. Find active menu schedule for this location and date
@@ -732,7 +739,7 @@ class MenuScheduleService:
     
     async def _get_dish_details(self, dish_ids: List[PydanticObjectId]) -> List["DishInMenu"]:
         """Helper method to get dish details and convert to DishInMenu format"""
-        from pae_menus.models.dish import Dish
+        from models.dish import Dish
         
         if not dish_ids:
             return []
