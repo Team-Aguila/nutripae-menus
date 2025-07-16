@@ -10,12 +10,16 @@ class DishService:
         Creates a new dish.
         - Validates that the dish name is unique.
         - Validates that all ingredients in the recipe exist and are active.
+        - Validates that the recipe has at least one ingredient.
         """
         if await Dish.find_one(Dish.name == dish_data.name):
             raise ValueError(f"Dish with name '{dish_data.name}' already exists.")
 
-        if dish_data.recipe and dish_data.recipe.ingredients:
-            await self._validate_recipe_ingredients(dish_data.recipe.ingredients)
+        # Validate that recipe has at least one ingredient
+        if not dish_data.recipe or not dish_data.recipe.ingredients:
+            raise ValueError("Dish recipe must have at least one ingredient.")
+
+        await self._validate_recipe_ingredients(dish_data.recipe.ingredients)
 
         dish = Dish(**dish_data.model_dump())
         await dish.create()
@@ -34,16 +38,16 @@ class DishService:
         """
         Retrieves all dishes, with optional filtering.
         """
-        query = []
+        query = {}
         if name:
-            query.append(Dish.name.ilike(f"%{name}%"))
+            query["name"] = {"$regex": name, "$options": "i"}
         if status:
-            query.append(Dish.status == status)
+            query["status"] = status
         if meal_type:
             # This query finds dishes where the meal_type is present in the compatible_meal_types list
-            query.append(Dish.compatible_meal_types == meal_type)
+            query["compatible_meal_types"] = meal_type
             
-        return await Dish.find(*query).to_list()
+        return await Dish.find(query).to_list()
 
     async def update_dish(self, dish_id: PydanticObjectId, dish_data: DishUpdate) -> Optional[Dish]:
         """
@@ -58,6 +62,12 @@ class DishService:
         if not update_data:
             return dish
 
+        # Check for duplicate name if name is being updated
+        if "name" in update_data and update_data["name"] != dish.name:
+            existing_dish = await Dish.find_one({"name": update_data["name"], "_id": {"$ne": dish_id}})
+            if existing_dish:
+                raise ValueError(f"Dish with name '{update_data['name']}' already exists.")
+
         if "recipe" in update_data and update_data["recipe"]:
             new_recipe = Recipe(**update_data["recipe"])
             await self._validate_recipe_ingredients(new_recipe.ingredients)
@@ -68,6 +78,71 @@ class DishService:
         dish.update_timestamp()
         await dish.save()
         return dish
+
+    async def delete_dish(self, dish_id: PydanticObjectId) -> dict:
+        """
+        Delete a dish by its ID.
+        
+        Args:
+            dish_id: The dish ID to delete
+            
+        Returns:
+            dict: Confirmation message with deleted dish details
+            
+        Raises:
+            ValueError: If dish is used in active menu cycles or not found
+        """
+        dish = await self.get_dish(dish_id)
+        if not dish:
+            raise ValueError(f"Dish with id '{dish_id}' not found")
+        
+        # Check if dish is used in any menu cycles
+        await self._validate_dish_not_in_use(dish_id, dish.name)
+        
+        # Store dish info for response before deletion
+        dish_info = {
+            "id": str(dish.id),
+            "name": dish.name,
+            "status": dish.status,
+            "compatible_meal_types": [meal_type.value for meal_type in dish.compatible_meal_types]
+        }
+        
+        # Perform the deletion
+        await dish.delete()
+        
+        return {
+            "message": f"Dish '{dish.name}' deleted successfully",
+            "deleted_dish": dish_info
+        }
+
+    async def _validate_dish_not_in_use(self, dish_id: PydanticObjectId, dish_name: str):
+        """
+        Validate that a dish is not used in any menu cycles before deletion.
+        
+        Args:
+            dish_id: The dish ID to check
+            dish_name: The dish name for error messages
+            
+        Raises:
+            ValueError: If dish is used in any menu cycles
+        """
+        # Import here to avoid circular imports
+        from models.menu_cycle import MenuCycle
+        
+        # Check if dish is used in any menu cycles
+        menu_cycles_using_dish = await MenuCycle.find({
+            "$or": [
+                {"daily_menus": {"$elemMatch": {"breakfast_dish_ids": dish_id}}},
+                {"daily_menus": {"$elemMatch": {"lunch_dish_ids": dish_id}}},
+                {"daily_menus": {"$elemMatch": {"snack_dish_ids": dish_id}}}
+            ]
+        }).to_list()
+        
+        if menu_cycles_using_dish:
+            cycle_names = [cycle.name for cycle in menu_cycles_using_dish]
+            raise ValueError(
+                f"Cannot delete dish '{dish_name}' because it is used in menu cycles: {', '.join(cycle_names)}"
+            )
 
     async def _validate_recipe_ingredients(self, recipe_ingredients: list):
         """
