@@ -29,11 +29,11 @@ async def init_db() -> None:
     global motor_client
     
     try:
-        logger.info(f"Connecting to MongoDB at {settings.mongo_host}:{settings.mongo_port}")
+        logger.info(f"Connecting to MongoDB at {settings.DB_HOST}:{settings.DB_PORT}")
         
         # Create Motor client with connection settings
         motor_client = AsyncIOMotorClient(
-            settings.mongo_url_without_db,
+            settings.MONGO_URL_WITHOUT_DB,
             serverSelectionTimeoutMS=5000,  # 5 second timeout
             connectTimeoutMS=5000,
             maxPoolSize=50,
@@ -46,7 +46,7 @@ async def init_db() -> None:
         logger.info("Successfully connected to MongoDB")
         
         # Get the database
-        database = motor_client[settings.mongo_db_name]
+        database = motor_client[settings.DB_NAME]
         
         # Initialize Beanie with all document models
         document_models = [
@@ -61,12 +61,12 @@ async def init_db() -> None:
             document_models=document_models
         )
         
-        logger.info(f"Successfully initialized Beanie ODM with database '{settings.mongo_db_name}'")
+        logger.info(f"Successfully initialized Beanie ODM with database '{settings.DB_NAME}'")
         logger.info(f"Registered document models: {[model.__name__ for model in document_models]}")
         
     except ServerSelectionTimeoutError as e:
         logger.error(f"Failed to connect to MongoDB: {e}")
-        raise Exception(f"Could not connect to MongoDB at {settings.mongo_host}:{settings.mongo_port}. Make sure MongoDB is running.")
+        raise Exception(f"Could not connect to MongoDB at {settings.DB_HOST}:{settings.DB_PORT}. Make sure MongoDB is running.")
     
     except ConfigurationError as e:
         logger.error(f"MongoDB configuration error: {e}")
@@ -112,7 +112,7 @@ async def get_database():
     if not motor_client:
         raise Exception("Database not initialized. Call init_db() first.")
     
-    return motor_client[settings.mongo_db_name]
+    return motor_client[settings.DB_NAME]
 
 
 async def health_check() -> dict:
@@ -131,13 +131,13 @@ async def health_check() -> dict:
         await motor_client.admin.command('ping')
         
         # Get database stats for logging
-        db = motor_client[settings.mongo_db_name]
+        db = motor_client[settings.DB_NAME]
         stats = await db.command('dbStats')
         
         # Log detailed database information
         logger.info(f"Database health check successful - "
-                   f"Database: {settings.mongo_db_name}, "
-                   f"Host: {settings.mongo_host}:{settings.mongo_port}, "
+                   f"Database: {settings.DB_NAME}, "
+                   f"Host: {settings.DB_HOST}:{settings.DB_PORT}, "
                    f"Collections: {stats.get('collections', 0)}, "
                    f"Data size: {stats.get('dataSize', 0)} bytes")
         

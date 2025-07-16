@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DB_PORT: int = Field(default=27018, description="MongoDB port")
     DB_USER: str = Field(default="root", description="MongoDB username")
     DB_PASSWORD: str = Field(default="example", description="MongoDB password")
-    DB_NAME: str = Field(default="pae_compras", description="MongoDB database name")
+    DB_NAME: str = Field(default="pae_menus", description="MongoDB database name")
     DB_AUTH_NAME: str = Field(default="admin", description="MongoDB authentication database")
 
     MONGO_URL: str | None = None
