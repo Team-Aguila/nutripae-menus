@@ -147,4 +147,33 @@ async def deactivate_menu_cycle(
     
     - **menu_cycle_id**: The unique identifier of the menu cycle to deactivate
     """
-    return await service.deactivate_menu_cycle(menu_cycle_id) 
+    return await service.deactivate_menu_cycle(menu_cycle_id)
+
+@router.delete(
+    "/{menu_cycle_id}",
+    summary="Delete a menu cycle",
+    description="Delete a menu cycle by its ID."
+)
+async def delete_menu_cycle(
+    menu_cycle_id: str,
+    service: MenuCycleService = Depends(lambda: menu_cycle_service),
+    current_user: dict = Depends(require_delete()),
+) -> dict:
+    """
+    Delete a menu cycle.
+    
+    This action permanently removes the menu cycle from the system.
+    
+    **WARNING**: This is a permanent action and cannot be undone.
+    
+    Business Rules:
+    - Menu cycles cannot be deleted if assigned to any schedules
+    - Deletion removes all menu cycle data including daily menu assignments
+    - Returns confirmation with deleted menu cycle details
+    
+    **menu_cycle_id**: The unique identifier of the menu cycle to delete
+    
+    Returns:
+    - Confirmation message with details of the deleted menu cycle
+    """
+    return await service.delete_menu_cycle(menu_cycle_id) 
